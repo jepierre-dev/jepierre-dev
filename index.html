@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jean Ortiz · Full-Stack Developer (Web · Mobile)</title>
+<meta name="description" content="Full-Stack Developer con 2+ años de experiencia. Web, mobile y productos punta a punta — Flutter, React, Next.js, TypeScript, NestJS, PostgreSQL.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* shadcn-inspired neutral (zinc) + purple accent — light / dark via prefers-color-scheme */
+  :root{
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-fg: 240 10% 3.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-fg: 240 3.8% 46.1%;
+    --border: 240 5.9% 90%;
+    --primary: 240 5.9% 10%;
+    --primary-fg: 0 0% 98%;
+    --accent: 271 91% 65%;      /* purple-500 */
+    --accent-soft: 271 91% 65% / .12;
+    --ring: 240 5.9% 10%;
+    --radius: .625rem;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --background: 240 10% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 240 6% 8%;
+      --card-fg: 0 0% 98%;
+      --muted: 240 3.7% 15.9%;
+      --muted-fg: 240 5% 64.9%;
+      --border: 240 3.7% 20%;
+      --primary: 0 0% 98%;
+      --primary-fg: 240 5.9% 10%;
+      --accent: 271 91% 70%;
+      --accent-soft: 271 91% 65% / .18;
+      --ring: 240 4.9% 83.9%;
+    }
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    position:relative;
+    overflow-x:hidden;
+    font-family:'Geist', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    font-size:15px; line-height:1.65;
+    color:hsl(var(--foreground));
+    background:hsl(var(--background));
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .mono{font-family:'JetBrains Mono', ui-monospace, monospace}
+  h1,h2,h3{margin:0; letter-spacing:-.02em; font-weight:600; line-height:1.15}
+  p{margin:0}
+  a{color:inherit; text-decoration:none}
+  a:focus-visible, button:focus-visible{
+    outline:2px solid hsl(var(--accent)); outline-offset:3px; border-radius:4px;
+  }
+
+  /* Ambient background: dot grid + colored orbs distributed across scroll */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+    background-image: radial-gradient(circle at 1px 1px, hsl(var(--muted-fg) / .11) 1.1px, transparent 0);
+    background-size: 32px 32px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 30%),
+      hsl(var(--accent) / .12),
+      hsl(199 89% 60% / .05) 30%,
+      transparent 55%);
+    transition: background 100ms;
+  }
+  .ambient{
+    position:absolute; inset:0; height:100%;
+    pointer-events:none; z-index:-1;
+    overflow:hidden;
+  }
+  .orb{
+    position:absolute; border-radius:50%;
+    filter:blur(80px); opacity:.55;
+    will-change:transform;
+  }
+  /* Distributed across scroll depth so different colors appear as you scroll */
+  .orb.o1{width:560px; height:560px; top:-120px;   left:-160px; background:hsl(271 91% 65% / .55)}  /* purple, hero */
+  .orb.o2{width:440px; height:440px; top:60vh;     right:-180px; background:hsl(199 89% 60% / .40)} /* blue */
+  .orb.o3{width:400px; height:400px; top:140vh;    left:-140px;  background:hsl(160 84% 55% / .35)} /* emerald (Node) */
+  .orb.o4{width:480px; height:480px; top:220vh;    right:-160px; background:hsl(340 82% 65% / .40)} /* pink */
+  .orb.o5{width:420px; height:420px; top:300vh;    left:20vw;    background:hsl(38 92% 60% / .30)}  /* amber (Java) */
+  .orb.o6{width:500px; height:500px; top:380vh;    right:-180px; background:hsl(271 91% 65% / .45)} /* purple, contact */
+
+  /* 3D perspective containers for cards */
+  .grid, .timeline, #contact .card{ perspective:1200px }
+  .tilt{
+    transform-style:preserve-3d;
+    will-change:transform;
+    transition:transform 350ms cubic-bezier(.2,.7,.2,1);
+  }
+
+  /* Char reveal for hero (initial state applied via JS to keep text visible if GSAP fails) */
+  .hero h1 .char{ display:inline-block; transform-origin:50% 100% }
+  .hero h1{ perspective:800px }
+
+  .wrap{max-width:960px; margin:0 auto; padding:0 1.5rem}
+
+  /* NAV */
+  nav{
+    position:sticky; top:0; z-index:20;
+    background:hsl(var(--background) / .8);
+    backdrop-filter:saturate(140%) blur(10px);
+    -webkit-backdrop-filter:saturate(140%) blur(10px);
+    border-bottom:1px solid hsl(var(--border));
+  }
+  nav .wrap{display:flex; justify-content:space-between; align-items:center; padding:.85rem 1.5rem; gap:1rem; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:.6rem; font-weight:600; font-size:.95rem}
+  .brand-dot{
+    width:.7rem; height:.7rem; border-radius:50%;
+    background:hsl(var(--accent));
+    box-shadow:0 0 0 3px hsl(var(--accent) / .2);
+  }
+  nav ul{display:flex; gap:.25rem; list-style:none; margin:0; padding:0; flex-wrap:wrap}
+  nav ul a{
+    display:inline-block; padding:.4rem .75rem; border-radius:calc(var(--radius) - 2px);
+    font-size:.85rem; color:hsl(var(--muted-fg)); transition:color 150ms, background 150ms;
+  }
+  nav ul a:hover{color:hsl(var(--foreground)); background:hsl(var(--muted))}
+
+  .nav-toggle{
+    display:none; align-items:center; justify-content:center;
+    width:34px; height:34px; border:1px solid hsl(var(--border));
+    border-radius:calc(var(--radius) - 2px);
+    background:transparent; color:hsl(var(--foreground)); cursor:pointer;
+    transition:background 150ms;
+  }
+  .nav-toggle:hover{ background:hsl(var(--muted)) }
+  .nav-toggle svg{ width:18px; height:18px; transition:transform 200ms }
+  .nav-toggle[aria-expanded="true"] svg{ transform:rotate(90deg) }
+
+  /* Language toggle badges (from reference) */
+  .lang{display:flex; gap:.35rem; align-items:center}
+  .badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    height:1.35rem; padding:0 .55rem; border-radius:9999px;
+    font-family:'JetBrains Mono', monospace; font-size:.65rem; font-weight:500;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:background 150ms, color 150ms;
+  }
+  .badge.active{background:hsl(var(--primary)); color:hsl(var(--primary-fg))}
+  .badge.inactive{background:hsl(var(--muted)); color:hsl(var(--muted-fg))}
+  .badge.inactive:hover{background:hsl(var(--border))}
+
+  /* HERO */
+  .hero{
+    position:relative; overflow:hidden;
+    padding:5rem 0 4rem;
+    min-height:min(85vh, 780px);
+    display:flex; align-items:center;
+    border-bottom:1px solid hsl(var(--border));
+  }
+  .hero .wrap{ position:relative; z-index:2; width:100% }
+  .hero-orbit{
+    position:absolute; inset:0; z-index:0;
+    display:flex; align-items:center; justify-content:center;
+    perspective:1400px;
+    pointer-events:none;
+  }
+  .hero-fade{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(ellipse 900px 520px at 22% 55%,
+        hsl(var(--background) / .95) 18%,
+        hsl(var(--background) / .55) 46%,
+        transparent 78%);
+  }
+  @media (max-width:720px){
+    /* Nav becomes brand + hamburger + lang */
+    nav .wrap{ padding:.6rem 1rem; gap:.5rem; flex-wrap:nowrap }
+    .brand{ font-size:.9rem; flex:1; min-width:0 }
+    .brand span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .nav-toggle{ display:inline-flex }
+    nav ul{
+      display:none;
+      position:absolute; top:100%; left:0; right:0;
+      flex-direction:column; gap:0;
+      background:hsl(var(--background) / .98);
+      backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+      border-bottom:1px solid hsl(var(--border));
+      padding:.25rem 1rem .75rem;
+    }
+    nav ul.open{ display:flex }
+    nav ul li{ border-top:1px solid hsl(var(--border) / .5) }
+    nav ul li:first-child{ border-top:none }
+    nav ul a{
+      display:block; padding:.7rem .25rem;
+      font-size:.9rem; color:hsl(var(--foreground));
+      border-radius:0;
+    }
+    nav ul a:hover{ background:transparent; color:hsl(var(--accent)) }
+
+    /* Hero — tighter, orbit hidden so text breathes */
+    .hero{ min-height:auto; padding:2.5rem 0 2.5rem }
+    .hero-orbit{ display:none }
+    .hero-fade{ display:none }
+    .hero h1{ font-size:clamp(2rem, 9vw, 2.75rem); margin-bottom:.75rem }
+    .hero .eyebrow{ font-size:.7rem; margin-bottom:.9rem }
+    .hero p.lead{ font-size:.95rem; margin-bottom:1.25rem }
+    .actions{ gap:.5rem; flex-wrap:wrap }
+    .btn{ padding:.5rem .9rem; font-size:.85rem; flex:0 1 auto }
+
+    /* Sections — tighter */
+    section{ padding:2.25rem 0 }
+    .section-head{ margin-bottom:1.1rem }
+    section h2{ font-size:1.4rem }
+    .section-head .kicker{ font-size:.7rem }
+
+    /* Cards & timeline — prevent content overflow */
+    .card, .tl-item, .tl-body, .project, #contact .card{ min-width:0 }
+    .card, .tl-item{ overflow-wrap:anywhere }
+    .tl-item{ padding:1rem }
+    .tl-body h3{ font-size:1rem }
+    .tl-body p{ font-size:.88rem }
+    .card{ padding:1rem }
+    .project p{ min-height:auto }
+
+    /* Chip rows always wrap tight on mobile */
+    .stack, .project .stack{ display:flex; flex-wrap:wrap; gap:.3rem }
+    .chip{ font-size:.65rem; padding:.15rem .45rem }
+
+    /* Contact rows: keep arrow visible, break long values safely */
+    #contact .card-row{ padding:.85rem 1rem; gap:.75rem }
+    #contact .card-row > div{ min-width:0; flex:1 }
+    #contact .card-row .value{ font-size:.9rem; overflow-wrap:anywhere; word-break:normal }
+
+    /* Skill groups spacing */
+    .skill-group h3{ font-size:.7rem }
+    .tag{ font-size:.75rem; padding:.25rem .55rem }
+
+    footer{ padding:1.5rem 0 2rem; font-size:.78rem }
+  }
+  .hero .eyebrow{
+    display:inline-flex; align-items:center; gap:.5rem;
+    font-family:'JetBrains Mono', monospace; font-size:.75rem;
+    color:hsl(var(--muted-fg));
+    margin-bottom:1.25rem;
+  }
+  .hero .eyebrow .dot{
+    width:.5rem; height:.5rem; border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 0 3px rgba(34,197,94,.2);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{opacity:.6}}
+  .hero h1{
+    font-size:clamp(2.25rem, 6vw, 3.75rem);
+    font-weight:600;
+    margin-bottom:1rem;
+  }
+  .hero h1 .accent{
+    background:linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--accent)));
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+  }
+  .hero p.lead{
+    font-size:clamp(1rem,1.5vw,1.15rem);
+    color:hsl(var(--muted-fg));
+    max-width:60ch;
+    margin-bottom:2rem;
+  }
+  .actions{display:flex; gap:.6rem; flex-wrap:wrap}
+  .btn{
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.6rem 1.1rem;
+    border-radius:var(--radius);
+    font-size:.9rem; font-weight:500;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:background 150ms, color 150ms, border-color 150ms, transform 150ms;
+  }
+  .btn.primary{background:hsl(var(--primary)); color:hsl(var(--primary-fg))}
+  .btn.primary:hover{background:hsl(var(--primary) / .9)}
+  .btn.ghost{background:transparent; color:hsl(var(--foreground)); border-color:hsl(var(--border))}
+  .btn.ghost:hover{background:hsl(var(--muted))}
+  .btn svg{width:1rem; height:1rem}
+
+  /* SECTION */
+  section{padding:3rem 0}
+  .section-head{margin-bottom:1.5rem}
+  .section-head .kicker{
+    font-family:'JetBrains Mono', monospace; font-size:.75rem;
+    color:hsl(var(--accent)); font-weight:500;
+    letter-spacing:.05em;
+    margin-bottom:.35rem; display:block;
+  }
+  section h2{font-size:1.65rem; font-weight:600}
+
+  /* CARD */
+  .card{
+    background:hsl(var(--card)); color:hsl(var(--card-fg));
+    border:1px solid hsl(var(--border));
+    border-radius:var(--radius);
+    padding:1.25rem;
+    transition:border-color 200ms, transform 200ms;
+  }
+  .card:hover{border-color:hsl(var(--accent) / .5)}
+
+  /* ABOUT */
+  #about p{font-size:1.05rem; color:hsl(var(--muted-fg)); max-width:65ch}
+  #about p + p{margin-top:.75rem}
+
+  /* TIMELINE (experience & studies) */
+  .timeline{display:flex; flex-direction:column; gap:.75rem}
+  .tl-item{
+    display:grid; grid-template-columns:1fr; gap:.4rem;
+    padding:1.25rem;
+    background:hsl(var(--card));
+    border:1px solid hsl(var(--border));
+    border-radius:var(--radius);
+    transition:border-color 200ms;
+  }
+  .tl-item:hover{border-color:hsl(var(--accent) / .5)}
+  @media (min-width:720px){
+    .tl-item{grid-template-columns:180px 1fr; gap:1.5rem}
+  }
+  .tl-meta{
+    font-family:'JetBrains Mono', monospace; font-size:.75rem;
+    color:hsl(var(--muted-fg)); padding-top:.15rem;
+  }
+  .tl-body h3{font-size:1.05rem; margin-bottom:.15rem}
+  .tl-body .sub{font-size:.9rem; color:hsl(var(--accent)); font-weight:500; margin-bottom:.5rem}
+  .tl-body p{font-size:.92rem; color:hsl(var(--muted-fg))}
+
+  /* PROJECTS GRID */
+  .grid{display:grid; grid-template-columns:1fr; gap:1rem}
+  @media (min-width:640px){.grid{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}}
+  .project h3{font-size:1rem; margin-bottom:.35rem; display:flex; align-items:center; gap:.5rem}
+  .project h3::before{
+    content:""; width:.4rem; height:.4rem; border-radius:50%;
+    background:hsl(var(--accent));
+  }
+  .project p{font-size:.88rem; color:hsl(var(--muted-fg)); margin-bottom:.75rem; min-height:2.6rem}
+  .project .stack{display:flex; gap:.35rem; flex-wrap:wrap; margin-bottom:.85rem}
+  .chip{
+    font-family:'JetBrains Mono', monospace; font-size:.68rem;
+    padding:.15rem .5rem; border-radius:9999px;
+    background:hsl(var(--muted)); color:hsl(var(--muted-fg));
+  }
+  .project .links{display:flex; gap:.75rem; font-size:.82rem; font-weight:500}
+  .project .links a{color:hsl(var(--foreground)); display:inline-flex; align-items:center; gap:.3rem; transition:color 150ms}
+  .project .links a:hover{color:hsl(var(--accent))}
+
+  /* SKILLS */
+  .skill-groups{display:grid; grid-template-columns:1fr; gap:1rem}
+  @media (min-width:720px){.skill-groups{grid-template-columns:1fr 1fr}}
+  .skill-group h3{
+    font-family:'JetBrains Mono', monospace; font-size:.75rem;
+    color:hsl(var(--muted-fg)); text-transform:uppercase; letter-spacing:.08em;
+    margin-bottom:.75rem;
+  }
+  .skill-group .tags{display:flex; flex-wrap:wrap; gap:.4rem}
+  .tag{
+    font-size:.8rem; padding:.3rem .7rem;
+    background:hsl(var(--muted)); color:hsl(var(--foreground));
+    border-radius:9999px;
+  }
+
+  /* CONTACT */
+  #contact .card-row{display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.25rem}
+  #contact .card-row + .card-row{border-top:1px solid hsl(var(--border))}
+  #contact .card-row .label{font-family:'JetBrains Mono', monospace; font-size:.72rem; color:hsl(var(--muted-fg)); margin-bottom:.15rem}
+  #contact .card-row .value{font-size:.95rem; font-weight:500}
+  #contact .card-row a.value:hover{color:hsl(var(--accent))}
+  #contact .card{padding:0; overflow:hidden}
+
+  footer{padding:2rem 0 3rem; text-align:center; color:hsl(var(--muted-fg)); font-size:.82rem; border-top:1px solid hsl(var(--border)); margin-top:2rem}
+  footer .mono{font-size:.72rem; opacity:.7}
+
+  /* Floating tech icons — scattered on right of hero, animated */
+  .hero-orbit{
+    position:absolute; inset:0; z-index:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .orbit-glow{
+    position:absolute; top:50%; left:70%;
+    width:200px; height:200px; border-radius:50%;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle, hsl(var(--accent) / .35), transparent 70%);
+    filter:blur(40px); pointer-events:none;
+  }
+  .hero-orbit .orbit-glow{
+    width:600px; height:600px;
+    background:radial-gradient(circle, hsl(var(--accent) / .5), hsl(271 91% 65% / .15) 40%, transparent 70%);
+    filter:blur(80px);
+  }
+  .orbit-ring{ position:absolute; inset:0 }
+  .orbit-ring .planet{
+    position:absolute;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:
+      0 12px 40px rgba(0,0,0,.4),
+      0 0 0 1px hsl(0 0% 100% / .08);
+    animation: float 6s ease-in-out infinite, sway 8s ease-in-out infinite;
+    will-change:translate, rotate;
+  }
+  .orbit-ring .planet img{
+    display:block; width:100%; height:100%;
+  }
+  @keyframes float{
+    0%,100% { translate: 0 -10px 0 }
+    50%     { translate: 0 10px 0 }
+  }
+  @keyframes sway{
+    0%,100% { rotate: -3deg }
+    50%     { rotate: 3deg }
+  }
+  @media (max-width:720px){
+    .hero-orbit{ opacity:.35 }
+  }
+
+  /* Fade in on load */
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+  section, .hero{animation:fadeIn .5s ease-out both}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important; scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true">
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+  <div class="orb o3"></div>
+  <div class="orb o4"></div>
+  <div class="orb o5"></div>
+  <div class="orb o6"></div>
+</div>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="brand"><span class="brand-dot"></span><span>Jean Ortiz</span></a>
+    <ul id="navMenu">
+      <li><a href="#about" data-i18n="nav.about">About</a></li>
+      <li><a href="#experience" data-i18n="nav.experience">Experience</a></li>
+      <li><a href="#studies" data-i18n="nav.studies">Studies</a></li>
+      <li><a href="#projects" data-i18n="nav.projects">Projects</a></li>
+      <li><a href="#stack" data-i18n="nav.skills">Stack</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </svg>
+    </button>
+    <div class="lang" role="group" aria-label="Language">
+      <button class="badge active" data-lang="en" aria-pressed="true">EN</button>
+      <button class="badge inactive" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-orbit" aria-hidden="true">
+    <div class="orbit-glow"></div>
+    <div class="orbit-ring" id="orbitRing"></div>
+  </div>
+  <div class="hero-fade" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span data-i18n="hero.status">Actualmente construyendo AURUM en Sun Valley Investments</span></span>
+    <h1>
+      <span data-i18n="hero.title.a">Desarrollador Full-Stack</span><br>
+      <span class="accent" data-i18n="hero.title.b">web, móvil y productos punta a punta.</span>
+    </h1>
+    <p class="lead" data-i18n="hero.lead">Construyo productos que resuelven problemas reales — desde un sistema de trazabilidad minera con 50+ usuarios e integración con periféricos físicos, hasta plataformas operativas y de pagos en producción. Código limpio, buena UX e impacto medible.</p>
+    <div class="actions">
+      <a href="#projects" class="btn primary" data-i18n="hero.cta.primary">Ver proyectos</a>
+      <a href="#contact" class="btn ghost" data-i18n="hero.cta.secondary">Contactar</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">01 · <span data-i18n="section.about.kicker">Introduction</span></span>
+      <h2 data-i18n="section.about.title">About</h2>
+    </div>
+    <p data-i18n="about.p1">Desarrollador full-stack con 2+ años de experiencia, cómodo en frontend/mobile y backend. Construyo productos que resuelven problemas reales — desde trazabilidad minera con hardware físico hasta plataformas de pagos en producción.</p>
+    <p data-i18n="about.p2">Co-fundador de <strong>ChronoSoft</strong>. Me importa el código limpio, buena UX y el impacto medible. Actualmente cursando Ingeniería en Sistemas en el ITM.</p>
+  </div>
+</section>
+
+<section id="experience">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">02 · <span data-i18n="section.experience.kicker">Where I've worked</span></span>
+      <h2 data-i18n="section.experience.title">Experience</h2>
+    </div>
+    <div class="timeline">
+
+      <article class="tl-item">
+        <div class="tl-meta mono">JUN 2025 — PRESENTE</div>
+        <div class="tl-body">
+          <h3>Sun Valley Investments</h3>
+          <div class="sub">Desarrollador Full-Stack</div>
+          <p>Desarrollo <strong>AURUM</strong> de punta a punta (frontend + backend): plataforma de trazabilidad minera end-to-end usada por <strong>50+ usuarios</strong> con visibilidad total del procesamiento de oro.</p>
+          <p>Integré periféricos físicos — impresoras, básculas camioneras y elevadoras mineras — para capturar datos operativos en tiempo real. Automaticé compras y titulaciones ahorrando <strong>2 h/día a 10+ personas</strong>. Autenticación con RBAC y WebSockets entre hardware y backend.</p>
+          <div class="stack" style="margin-top:.5rem">
+            <span class="chip">Flutter</span><span class="chip">NestJS</span><span class="chip">PostgreSQL</span><span class="chip">Azure</span><span class="chip">WebSockets</span><span class="chip">IoT</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="tl-item">
+        <div class="tl-meta mono">ABR 2024 — JUN 2025</div>
+        <div class="tl-body">
+          <h3>Coins Tech Colombia</h3>
+          <div class="sub">Desarrollador Full-Stack</div>
+          <p>Construí una plataforma de parqueaderos hoy en producción, procesando <strong>100–200 transacciones diarias</strong>. Integré pagos con Wompi para transacciones en tiempo real.</p>
+          <p>Lideré un <strong>design system</strong> para apps operativas y de administración, mejorando consistencia y usabilidad en 10+ interfaces. Optimicé renderizado y assets reduciendo tiempos de carga; backend en AWS.</p>
+          <div class="stack" style="margin-top:.5rem">
+            <span class="chip">Next.js</span><span class="chip">React</span><span class="chip">NestJS</span><span class="chip">LoopBack</span><span class="chip">PostgreSQL</span><span class="chip">AWS</span><span class="chip">Wompi</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="studies">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">03 · <span data-i18n="section.studies.kicker">Learning path</span></span>
+      <h2 data-i18n="section.studies.title">Studies</h2>
+    </div>
+    <div class="timeline">
+      <article class="tl-item">
+        <div class="tl-meta mono">2026 · EN CURSO</div>
+        <div class="tl-body">
+          <h3>Ingeniería en Sistemas</h3>
+          <div class="sub">ITM — Inst. Tecnológico Metropolitano</div>
+        </div>
+      </article>
+      <article class="tl-item">
+        <div class="tl-meta mono">2022 — 2025</div>
+        <div class="tl-body">
+          <h3>Tecnología en Desarrollo de Software</h3>
+          <div class="sub">ITM — Inst. Tecnológico Metropolitano</div>
+        </div>
+      </article>
+      <article class="tl-item">
+        <div class="tl-meta mono">OCT 2025 · CERT</div>
+        <div class="tl-body">
+          <h3>Azure Fundamentals (AZ-900)</h3>
+          <div class="sub">Microsoft</div>
+        </div>
+      </article>
+      <article class="tl-item">
+        <div class="tl-meta mono">AGO 2023 · CERT</div>
+        <div class="tl-body">
+          <h3>Kotlin Avanzado / Android</h3>
+          <div class="sub">Certificación</div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">04 · <span data-i18n="section.projects.kicker">Selected work</span></span>
+      <h2 data-i18n="section.projects.title">Projects</h2>
+    </div>
+    <div class="grid">
+
+      <article class="card project">
+        <h3>Chrono Parking <span style="font-size:.7em;color:hsl(var(--accent));font-weight:600;margin-left:.4em;">FOUNDER</span></h3>
+        <p>Plataforma completa de parqueaderos con pagos online/on-site, gestión de sesiones y reportes DIAN — producto insignia de ChronoSoft.</p>
+        <div class="stack">
+          <span class="chip">Next.js</span><span class="chip">NestJS</span><span class="chip">PostgreSQL</span><span class="chip">Docker</span>
+        </div>
+        <div class="links">
+          <a href="https://chronosoft.com.co" target="_blank" rel="noopener">↗ chronosoft.com.co</a>
+        </div>
+      </article>
+
+      <article class="card project">
+        <h3>Chrono POS <span style="font-size:.7em;color:hsl(var(--accent));font-weight:600;margin-left:.4em;">FOUNDER</span></h3>
+        <p>Punto de venta para retail — producto ChronoSoft con inventario en tiempo real, cajero y pasarelas de pago.</p>
+        <div class="stack">
+          <span class="chip">Angular</span><span class="chip">NestJS</span><span class="chip">TS</span><span class="chip">PostgreSQL</span>
+        </div>
+        <div class="links">
+          <a href="https://pos.chronosoft.com.co" target="_blank" rel="noopener">↗ pos.chronosoft.com.co</a>
+        </div>
+      </article>
+
+      <article class="card project">
+        <h3>Coins Pay</h3>
+        <p>Pasarela de pagos web para sesiones de parqueo en múltiples sedes — integración con Wompi, mobile-first, deploy en AWS.</p>
+        <div class="stack">
+          <span class="chip">Next.js</span><span class="chip">TS</span><span class="chip">Tailwind</span><span class="chip">AWS</span>
+        </div>
+        <div class="links">
+          <a href="https://pay.coins-colombia.com" target="_blank" rel="noopener">↗ pay.coins-colombia.com</a>
+        </div>
+      </article>
+
+      <article class="card project">
+        <h3>Aurum Suite</h3>
+        <p>App de gestión minera para trazabilidad del procesamiento de oro — laboratorio, básculas y operación de planta en múltiples sedes.</p>
+        <div class="stack">
+          <span class="chip">Flutter</span><span class="chip">Dart</span>
+        </div>
+        <div class="links">
+          <a href="https://aurumsuite.com.co" target="_blank" rel="noopener">↗ aurumsuite.com.co</a>
+        </div>
+      </article>
+
+      <article class="card project">
+        <h3>Aurum Suite API</h3>
+        <p>Backend de Aurum Suite: servicios REST + WebSockets, RBAC e integración con periféricos (impresoras, básculas, elevadoras) en tiempo real.</p>
+        <div class="stack">
+          <span class="chip">NestJS</span><span class="chip">PostgreSQL</span><span class="chip">WebSockets</span><span class="chip">Azure</span>
+        </div>
+        <div class="links">
+          <a href="https://aurumsuite.com.co" target="_blank" rel="noopener">↗ aurumsuite.com.co</a>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">05 · <span data-i18n="section.skills.kicker">Toolbox</span></span>
+      <h2 data-i18n="section.skills.title">Stack</h2>
+    </div>
+
+    <div class="skill-groups">
+      <div class="skill-group">
+        <h3>Frontend · Mobile</h3>
+        <div class="tags">
+          <span class="tag">Flutter</span><span class="tag">React</span><span class="tag">Next.js</span>
+          <span class="tag">Angular</span><span class="tag">TypeScript</span><span class="tag">Dart</span>
+          <span class="tag">Tailwind</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>Backend · Data</h3>
+        <div class="tags">
+          <span class="tag">NestJS</span><span class="tag">Node.js</span><span class="tag">Express</span>
+          <span class="tag">LoopBack</span><span class="tag">Java</span><span class="tag">Spring Boot</span>
+          <span class="tag">Quarkus</span><span class="tag">PostgreSQL</span><span class="tag">MySQL</span>
+          <span class="tag">Arq. Hexagonal</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>DevOps · Cloud · IoT</h3>
+        <div class="tags">
+          <span class="tag">Docker</span><span class="tag">AWS</span><span class="tag">Azure</span>
+          <span class="tag">Git</span><span class="tag">CI/CD</span><span class="tag">Hardware</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>AI · Automatización</h3>
+        <div class="tags">
+          <span class="tag">MCP Servers</span><span class="tag">AI Agents</span><span class="tag">n8n</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">06 · <span data-i18n="section.contact.kicker">Let's talk</span></span>
+      <h2 data-i18n="section.contact.title">Contact</h2>
+    </div>
+    <div class="card">
+      <a href="mailto:jeanpi.22241@gmail.com" class="card-row">
+        <div><div class="label mono">EMAIL</div><div class="value">jeanpi.22241@gmail.com</div></div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href="tel:+573508443779" class="card-row">
+        <div><div class="label mono">TELÉFONO</div><div class="value">+57 350 844 3779</div></div>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href="https://linkedin.com/in/jepierre89" target="_blank" rel="noopener" class="card-row">
+        <div><div class="label mono">LINKEDIN</div><div class="value">linkedin.com/in/jepierre89</div></div>
+        <span aria-hidden="true">↗</span>
+      </a>
+      <a href="https://github.com/jepierre-dev" target="_blank" rel="noopener" class="card-row">
+        <div><div class="label mono">GITHUB</div><div class="value">github.com/jepierre-dev</div></div>
+        <span aria-hidden="true">↗</span>
+      </a>
+      <a href="https://maps.google.com/?q=Sabaneta,Antioquia,Colombia" target="_blank" rel="noopener" class="card-row">
+        <div><div class="label mono">UBICACIÓN</div><div class="value">Sabaneta, Antioquia · CO</div></div>
+        <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© <span id="y"></span> Jean Ortiz · Sabaneta, CO</div>
+    <div class="mono">Built with HTML · CSS · zero build step</div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Declared early so functions called from setLang don't hit TDZ
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Mobile nav toggle
+  (() => {
+    const t = document.getElementById('navToggle');
+    const m = document.getElementById('navMenu');
+    if (!t || !m) return;
+    const close = () => { m.classList.remove('open'); t.setAttribute('aria-expanded','false'); };
+    t.addEventListener('click', () => {
+      const open = m.classList.toggle('open');
+      t.setAttribute('aria-expanded', open);
+    });
+    m.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
+  })();
+
+  // ponytail: bilingual EN/ES toggle via inline dict, no framework
+  const i18n = {
+    en: {
+      'nav.about':'About','nav.experience':'Experience','nav.studies':'Studies',
+      'nav.projects':'Projects','nav.skills':'Stack','nav.contact':'Contact',
+      'hero.status':'Currently building AURUM at Sun Valley Investments',
+      'hero.title.a':'Full-Stack Developer',
+      'hero.title.b':'web, mobile & end-to-end products.',
+      'hero.lead':'I build products that solve real problems — from a mining traceability system with 50+ users and physical peripherals, to parking and payments platforms running in production. Clean code, good UX, measurable impact.',
+      'hero.cta.primary':'See projects','hero.cta.secondary':'Get in touch',
+      'section.about.kicker':'Introduction','section.about.title':'About',
+      'section.experience.kicker':"Where I've worked",'section.experience.title':'Experience',
+      'section.studies.kicker':'Learning path','section.studies.title':'Studies',
+      'section.projects.kicker':'Selected work','section.projects.title':'Projects',
+      'section.skills.kicker':'Toolbox','section.skills.title':'Stack',
+      'section.contact.kicker':"Let's talk",'section.contact.title':'Contact',
+      'about.p1':"Full-stack developer with 2+ years of experience, comfortable across frontend/mobile and backend. I build products that solve real problems — from mining traceability with physical hardware to payment platforms in production.",
+      'about.p2':"Co-founder of <strong>ChronoSoft</strong>. I care about clean code, good UX and measurable impact. Currently pursuing a Systems Engineering degree at ITM."
+    },
+    es: {
+      'nav.about':'Sobre mí','nav.experience':'Experiencia','nav.studies':'Estudios',
+      'nav.projects':'Proyectos','nav.skills':'Stack','nav.contact':'Contacto',
+      'hero.status':'Actualmente construyendo AURUM en Sun Valley Investments',
+      'hero.title.a':'Desarrollador Full-Stack',
+      'hero.title.b':'web, móvil y productos punta a punta.',
+      'hero.lead':'Construyo productos que resuelven problemas reales — desde un sistema de trazabilidad minera con 50+ usuarios e integración con periféricos físicos, hasta plataformas operativas y de pagos en producción. Código limpio, buena UX e impacto medible.',
+      'hero.cta.primary':'Ver proyectos','hero.cta.secondary':'Contactar',
+      'section.about.kicker':'Introducción','section.about.title':'Sobre mí',
+      'section.experience.kicker':'Trayectoria','section.experience.title':'Experiencia',
+      'section.studies.kicker':'Formación','section.studies.title':'Estudios',
+      'section.projects.kicker':'Trabajo seleccionado','section.projects.title':'Proyectos',
+      'section.skills.kicker':'Herramientas','section.skills.title':'Stack',
+      'section.contact.kicker':'Hablemos','section.contact.title':'Contacto',
+      'about.p1':'Desarrollador full-stack con 2+ años de experiencia, cómodo en frontend/mobile y backend. Construyo productos que resuelven problemas reales — desde trazabilidad minera con hardware físico hasta plataformas de pagos en producción.',
+      'about.p2':'Co-fundador de <strong>ChronoSoft</strong>. Me importa el código limpio, buena UX y el impacto medible. Actualmente cursando Ingeniería en Sistemas en el ITM.'
+    }
+  };
+  const setLang = (l) => {
+    document.documentElement.lang = l;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const k = el.getAttribute('data-i18n');
+      if (i18n[l][k]) el.innerHTML = i18n[l][k];
+    });
+    document.querySelectorAll('.lang .badge').forEach(b => {
+      const on = b.dataset.lang === l;
+      b.classList.toggle('active', on);
+      b.classList.toggle('inactive', !on);
+      b.setAttribute('aria-pressed', on);
+    });
+    try{ localStorage.setItem('lang', l); }catch(_){}
+    splitHero();
+  };
+  document.querySelectorAll('.lang .badge').forEach(b =>
+    b.addEventListener('click', () => setLang(b.dataset.lang))
+  );
+  const saved = (() => { try { return localStorage.getItem('lang'); } catch(_) { return null; } })();
+  setLang(saved || (navigator.language?.startsWith('es') ? 'es' : 'en'));
+
+  // ponytail: cool scroll + 3D reveals via GSAP + ScrollTrigger CDN, no build.
+
+  function splitHero(){
+    if (reducedMotion || !window.gsap) return;
+    const first = document.querySelector('.hero h1 [data-i18n="hero.title.a"]');
+    const second = document.querySelector('.hero h1 [data-i18n="hero.title.b"]');
+    if (first){
+      const text = first.textContent;
+      first.innerHTML = '';
+      for (const ch of text){
+        const el = document.createElement('span');
+        el.className = 'char';
+        el.textContent = ch === ' ' ? '\u00A0' : ch;
+        first.appendChild(el);
+      }
+    }
+    gsap.set('.hero h1 .char', { y:'1em', rotateX:-40, opacity:0 });
+    if (second) gsap.set(second, { opacity:0, y:20 });
+    gsap.timeline()
+      .to('.hero h1 .char', {
+        y:0, rotateX:0, opacity:1,
+        duration:.6, ease:'expo.out', stagger:.015
+      })
+      .to(second, { opacity:1, y:0, duration:.6, ease:'expo.out' }, '-=0.2');
+  }
+
+  function initScrollFX(){
+    if (reducedMotion || !window.gsap || !window.ScrollTrigger) return;
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Parallax orbs — subtle, decorative only (skill guidance: 5-15% yPercent)
+    gsap.utils.toArray('.orb').forEach((orb, i) => {
+      gsap.to(orb, {
+        yPercent: -(8 + i * 6),
+        xPercent: (i % 2 ? 6 : -6),
+        ease:'none',
+        scrollTrigger:{ trigger:'body', start:'top top', end:'bottom top', scrub:true }
+      });
+    });
+
+    // Cards / timeline items: 3D reveal on enter
+    gsap.utils.toArray('.card, .tl-item').forEach(el => {
+      gsap.fromTo(el,
+        { rotateX:14, y:40, opacity:0, transformPerspective:1000 },
+        { rotateX:0, y:0, opacity:1, duration:.8, ease:'power2.out',
+          scrollTrigger:{ trigger:el, start:'top 88%', toggleActions:'play none none reverse' }
+        });
+    });
+
+    // Section headers: slide + fade
+    gsap.utils.toArray('.section-head').forEach(el => {
+      gsap.from(el, { x:-24, opacity:0, duration:.5, ease:'power2.out',
+        scrollTrigger:{ trigger:el, start:'top 88%', toggleActions:'play none none reverse' }
+      });
+    });
+  }
+
+  // Populate scattered floating tech icons — skillicons.dev, right side of hero
+  (() => {
+    const stack = [
+      ['flutter',  55, 5 ],
+      ['react',    74, 10],
+      ['nextjs',   93, 5 ],
+      ['ts',       58, 20],
+      ['tailwind', 76, 24],
+      ['angular',  94, 20],
+      ['dart',     56, 36],
+      ['java',     75, 40],
+      ['spring',   94, 36],
+      ['quarkus',  58, 52],
+      ['nestjs',   76, 55],
+      ['express',  94, 52],
+      ['nodejs',   56, 68],
+      ['postgres', 76, 71],
+      ['mysql',    94, 68],
+      ['docker',   55, 85],
+      ['git',      72, 88],
+      ['aws',      88, 85],
+      ['azure',    96, 92]
+    ];
+    const ring = document.getElementById('orbitRing');
+    if (!ring) return;
+    const isSmall = window.innerWidth < 720;
+    const size = isSmall ? 44 : 60;
+    stack.forEach(([slug, x, y]) => {
+      const p = document.createElement('div');
+      p.className = 'planet';
+      p.style.left = `${x}%`;
+      p.style.top = `${y}%`;
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      // randomize animation phase so each icon moves independently
+      const d1 = -(Math.random() * 6).toFixed(2);
+      const d2 = -(Math.random() * 8).toFixed(2);
+      p.style.animationDelay = `${d1}s, ${d2}s`;
+      p.style.animationDuration = `${(5 + Math.random() * 2.5).toFixed(1)}s, ${(6.5 + Math.random() * 3).toFixed(1)}s`;
+      p.title = slug;
+      const img = document.createElement('img');
+      img.src = `https://skillicons.dev/icons?i=${slug}`;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.width = size; img.height = size;
+      p.appendChild(img);
+      ring.appendChild(p);
+    });
+  })();
+
+  initScrollFX();
+
+  // Interactive 3D tilt on pointer move — only on devices with real hover (not touch)
+  if (!reducedMotion && matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.card, .tl-item').forEach(el => {
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect();
+        const rx = ((e.clientY - r.top) / r.height - .5) * -6;
+        const ry = ((e.clientX - r.left) / r.width - .5) * 8;
+        el.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+      });
+      el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+    });
+  }
+
+  // Cursor spotlight — updates --mx/--my for body::after radial-gradient
+  if (!reducedMotion && !matchMedia('(hover: none)').matches){
+    let raf = 0, mx = 0, my = 0;
+    window.addEventListener('pointermove', e => {
+      mx = e.clientX; my = e.clientY;
+      if (!raf) raf = requestAnimationFrame(() => {
+        document.body.style.setProperty('--mx', mx + 'px');
+        document.body.style.setProperty('--my', my + 'px');
+        raf = 0;
+      });
+    }, { passive: true });
+  }
+</script>
+
+</body>
+</html>
