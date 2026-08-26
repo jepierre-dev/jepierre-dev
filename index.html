@@ -1087,28 +1087,27 @@ if(!RM&&!MOBILE){
       if(clicked&&!hot){
         const dt=t-clickT;
         const len=Math.hypot(x2-x1,y2-y1);
-        const speed=120;
-        const p=((dt*speed/len+i*.17)%1+1)%1;
-        const segLen=.18;
-        const s0=p-segLen/2,s1=p+segLen/2;
+        const speed=100;
+        const p=((dt*speed/len+i*.23)%1+1)%1;
+        const seg=.22;
+        const cl=v=>Math.max(0,Math.min(1,v));
 
         const grad=nCx.createLinearGradient(x1,y1,x2,y2);
-        const clamp=v=>Math.max(0,Math.min(1,v));
-        grad.addColorStop(clamp(s0-.04),'rgba(168,85,247,0)');
-        grad.addColorStop(clamp(s0),'rgba(120,60,230,.6)');
-        grad.addColorStop(clamp(p),'rgba(220,180,255,.95)');
-        grad.addColorStop(clamp(s1),'rgba(120,60,230,.6)');
-        grad.addColorStop(clamp(s1+.04),'rgba(168,85,247,0)');
+        grad.addColorStop(cl(p-seg-.06),'rgba(168,85,247,.55)');
+        grad.addColorStop(cl(p-seg),'rgba(34,211,238,.3)');
+        grad.addColorStop(cl(p),'rgba(34,211,238,.95)');
+        grad.addColorStop(cl(p+seg),'rgba(34,211,238,.3)');
+        grad.addColorStop(cl(p+seg+.06),'rgba(168,85,247,.55)');
 
         nCx.beginPath();nCx.strokeStyle=grad;
-        nCx.lineWidth=3.5;nCx.moveTo(x1,y1);nCx.lineTo(x2,y2);nCx.stroke();
+        nCx.lineWidth=2.8;nCx.moveTo(x1,y1);nCx.lineTo(x2,y2);nCx.stroke();
 
-        const px=x1+(x2-x1)*p,py=y1+(y2-y1)*p;
-        const glow=nCx.createRadialGradient(px,py,0,px,py,12);
-        glow.addColorStop(0,'rgba(220,180,255,.5)');
-        glow.addColorStop(.5,'rgba(168,85,247,.15)');
-        glow.addColorStop(1,'transparent');
-        nCx.beginPath();nCx.arc(px,py,12,0,Math.PI*2);nCx.fillStyle=glow;nCx.fill();
+        const gx=x1+(x2-x1)*p,gy=y1+(y2-y1)*p;
+        const gl=nCx.createRadialGradient(gx,gy,0,gx,gy,14);
+        gl.addColorStop(0,'rgba(34,211,238,.45)');
+        gl.addColorStop(.5,'rgba(34,211,238,.1)');
+        gl.addColorStop(1,'transparent');
+        nCx.beginPath();nCx.arc(gx,gy,14,0,Math.PI*2);nCx.fillStyle=gl;nCx.fill();
       }
     }
 
