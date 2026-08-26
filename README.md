@@ -62,14 +62,12 @@ Desarrollo productos web y móviles de principio a fin: diseño la API, levanto 
 
 <p align="center">
   <img
-    src="https://github-readme-stats.vercel.app/api?username=jepierre-dev&show_icons=true&theme=tokyonight&hide_border=true&count_private=true"
+    src="https://TU-INSTANCIA.vercel.app/api?username=jepierre-dev&show_icons=true&theme=tokyonight&hide_border=true"
     height="165"
-    alt="GitHub Stats"
   />
   <img
-    src="https://github-readme-stats.vercel.app/api/top-langs/?username=jepierre-dev&layout=compact&theme=tokyonight&hide_border=true&langs_count=8"
+    src="https://TU-INSTANCIA.vercel.app/api/top-langs/?username=jepierre-dev&layout=compact&theme=tokyonight&hide_border=true&langs_count=8"
     height="165"
-    alt="Top Languages"
   />
 </p>
 
