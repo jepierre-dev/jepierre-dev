@@ -983,7 +983,7 @@ if(!RM&&!MOBILE){
     ['react',63,5],['nextjs',78,3],['ts',68,18],['angular',88,10],['tailwind',62,28],
     ['flutter',60,42],['dart',60,56],
     ['nestjs',75,36],['nodejs',90,28],['express',97,42],['js',83,52],
-    ['java',70,62],['spring',86,66],['graphql',97,58],
+    ['java',70,62],['spring',86,66],['quarkus',97,58],
     ['postgres',63,74],['mysql',75,80],
     ['docker',87,78],['git',97,72],['aws',92,90],['azure',78,92]
   ];
@@ -997,6 +997,8 @@ if(!RM&&!MOBILE){
     [16,17],[16,18],[16,19],[18,19],[14,16],[15,16]
   ];
 
+  const CUSTOM={quarkus:`data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><rect width="256" height="256" rx="60" fill="#242938"/><g transform="translate(48,48) scale(6.667)"><path fill="#4695EB" d="M12.364 6.286c-.423.09-.684.305-.874.655L7.93 13.203l1.69.886L12 9.575V23.55l3.37-1.932V2.383l-3.006 3.903zm-.243 11.093h.013v-.003l.004.002-.017.001zM1.51 6.138l3.26 15.074 3.077-1.764-1.803-8.54 5.587 2.888 1.601-2.847L1.51 6.138zm14.485 3.833-1.61 2.863 5.573 2.867 1.814-8.508 3.065 1.758L21.59 6.1l-5.594 3.872z"/></g></svg>')}`};
+
   let hovIdx=-1,clickIdx=-1,clickT=0;
   const els=[];
 
@@ -1008,7 +1010,7 @@ if(!RM&&!MOBILE){
       +`animation-delay:${-(Math.random()*7).toFixed(2)}s,${-(Math.random()*10).toFixed(2)}s;`
       +`animation-duration:${(6+Math.random()*3).toFixed(1)}s,${(8+Math.random()*4).toFixed(1)}s`;
     const img=document.createElement('img');
-    img.src=`https://skillicons.dev/icons?i=${slug}`;img.alt=slug;img.loading='lazy';
+    img.src=CUSTOM[slug]||`https://skillicons.dev/icons?i=${slug}`;img.alt=slug;img.loading='lazy';
     img.width=sz;img.height=sz;
     p.appendChild(img);ring.appendChild(p);els.push(p);
 
