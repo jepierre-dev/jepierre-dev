@@ -49,7 +49,7 @@ Desarrollo productos web y móviles de principio a fin: diseño la API, levanto 
 ![Azure](https://img.shields.io/badge/-Azure-0078D4?style=flat&logo=microsoftazure&logoColor=white)
 ![WebSockets](https://img.shields.io/badge/-WebSockets-4353FF?style=flat)
 
-### 🚀 Proyectos destacados..
+### 🚀 Proyectos destacados.
 
 | Proyecto | Stack | Link |
 |---|---|---|
