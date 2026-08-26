@@ -58,16 +58,23 @@ Desarrollo productos web y móviles de principio a fin: diseño la API, levanto 
 | **Coins Pay** — pagos | Next.js · TypeScript · Tailwind · AWS | [pay.coins-colombia.com](https://pay.coins-colombia.com) |
 | **Aurum Suite** — mobile + backend IoT | Flutter · NestJS · WebSockets · Azure | [aurumsuite.com.co](https://aurumsuite.com.co) |
 
+
 ### 📊 Stats
 
 <p align="center">
   <img
-    src="https://jepierre-dev.vercel.app/api?username=jepierre-dev&show_icons=true&theme=tokyonight&hide_border=true"
+    src="https://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=jepierre-dev&theme=tokyonight"
     height="165"
   />
   <img
-    src="https://jepierre-dev.vercel.app/api/top-langs/?username=jepierre-dev&layout=compact&theme=tokyonight&hide_border=true&langs_count=8"
+    src="https://streak-stats.demolab.com/?user=jepierre-dev&theme=tokyonight&hide_border=true"
     height="165"
+  />
+</p>
+
+<p align="center">
+  <img
+    src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=jepierre-dev&theme=tokyonight"
   />
 </p>
 
