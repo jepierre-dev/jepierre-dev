@@ -67,7 +67,7 @@ Desarrollo productos web y móviles de principio a fin: diseño la API, levanto 
     height="165"
   />
   <img
-    src="https://streak-stats.demolab.com/?user=jepierre-dev&theme=tokyonight&hide_border=true"
+    src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=jepierre-dev&theme=tokyonight"
     height="165"
   />
 </p>
