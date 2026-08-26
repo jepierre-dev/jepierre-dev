@@ -155,7 +155,8 @@ nav ul a:hover{color:var(--purple-l);background:rgba(168,85,247,.08);text-shadow
   display:flex;align-items:center;
   border-bottom:1px solid rgba(168,85,247,.1);
 }
-.hero .wrap{position:relative;z-index:5;width:100%}
+.hero .wrap{position:relative;z-index:5;width:100%;pointer-events:none}
+.hero .wrap a,.hero .wrap button,.hero .wrap .lang,.hero .wrap .eyebrow{pointer-events:auto}
 .hero .eyebrow{
   display:inline-flex;align-items:center;gap:.5rem;
   font-family:var(--mono);font-size:.75rem;color:var(--fg3);
