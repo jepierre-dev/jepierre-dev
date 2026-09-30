@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>Full-Stack Developer</b> · Web · Mobile · 2+ años construyendo productos punta a punta<br/>
-  <sub>📍 Sabaneta, Colombia</sub>
+  <sub>📍 Sabaneta, Colombia.</sub>
 </p>
 
 <p align="center">
