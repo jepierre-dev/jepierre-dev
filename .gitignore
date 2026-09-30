@@ -2,3 +2,17 @@ install.log
 node_modules/
 .vercel
 .DS_Store
+
+# Local browser tests: screenshots, console logs and page snapshots
+.playwright-mcp/
+test-results/
+playwright-report/
+
+# Local assistant settings and design experiments
+.claude/settings.local.json
+.superdesign/
+
+# Runtime logs and OS metadata (keep real images and downloadable PDFs)
+*.log
+Thumbs.db
+Desktop.ini

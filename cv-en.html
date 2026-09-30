@@ -18,13 +18,13 @@
     .hdr h1{font-size:2rem;font-weight:700;letter-spacing:-.03em;line-height:1}
     .hdr-stack{font-size:.85rem;color:#71717a;margin-top:.3rem}
     .hdr-contact{display:flex;flex-wrap:wrap;gap:.25rem 1.1rem;margin-top:.55rem;font-size:.8rem;color:#3f3f46}
-    .hdr-contact span::before{content:'→ ';color:#a855f7;font-weight:600}
+    .hdr-contact > *::before{content:'→ ';color:#a855f7;font-weight:600}
 
     .cols{display:flex;gap:0}
     .sidebar{width:32%;min-width:200px;padding:1rem 1.2rem 1rem 1.5rem;border-right:1px solid #e4e4e7;flex-shrink:0}
     .main{flex:1;padding:1rem 1.5rem 1rem 1.2rem}
 
-    .stitle{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a855f7;margin-bottom:.45rem;padding-bottom:.2rem;border-bottom:1px solid #e4e4e7;display:flex;align-items:center;gap:.3rem}
+    .stitle{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a855f7;margin:0 0 .45rem;padding-bottom:.2rem;border-bottom:1px solid #e4e4e7;display:flex;align-items:center;gap:.3rem}
     .stitle::before{content:'//';color:#d4d4d8;font-weight:400}
 
     .sblock+.sblock{margin-top:.85rem}
@@ -50,7 +50,7 @@
 
     .exp{margin-bottom:.7rem;padding-left:.75rem;border-left:2px solid #a855f7}
     .exp-head{display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;flex-wrap:wrap}
-    .exp-title{font-size:.9rem;font-weight:600;color:#1a1a1f}
+    .exp-title{font-size:.9rem;font-weight:600;color:#1a1a1f;margin:0}
     .exp-date{font-family:'JetBrains Mono',monospace;font-size:.625rem;color:#a1a1aa;flex-shrink:0}
     .exp-tags{font-family:'JetBrains Mono',monospace;font-size:.625rem;color:#a855f7;margin:.15rem 0 .25rem}
     .exp-tags::before{content:'$ ';color:#d4d4d8}
@@ -87,9 +87,9 @@
     <h1>Jean Ortiz</h1>
     <div class="hdr-stack">Flutter · React · Next.js · TypeScript · NestJS · PostgreSQL</div>
     <div class="hdr-contact">
-      <span>jeanpi.22241@gmail.com</span>
-      <span>+57 350 844 3779</span>
-      <span>linkedin.com/in/jepierre89</span>
+      <a href="mailto:jeanpi.22241@gmail.com">jeanpi.22241@gmail.com</a>
+      <a href="tel:+573508443779">+57 350 844 3779</a>
+      <a href="https://linkedin.com/in/jepierre89">linkedin.com/in/jepierre89</a>
       <span>Sabaneta, Antioquia · CO</span>
     </div>
   </div>
@@ -99,7 +99,7 @@
     <aside class="sidebar">
 
       <div class="sblock">
-        <div class="stitle">Frontend · Mobile</div>
+        <h2 class="stitle">Frontend · Mobile</h2>
         <div class="sktags">
           <span class="sk hi">Flutter</span><span class="sk hi">React</span><span class="sk hi">Next.js</span>
           <span class="sk">Angular</span><span class="sk">TypeScript</span><span class="sk">Dart</span><span class="sk">Tailwind</span>
@@ -107,7 +107,7 @@
       </div>
 
       <div class="sblock">
-        <div class="stitle">Backend · Data</div>
+        <h2 class="stitle">Backend · Data</h2>
         <div class="sktags">
           <span class="sk hi">NestJS</span><span class="sk hi">Node.js</span>
           <span class="sk">Express</span><span class="sk">LoopBack</span><span class="sk">PostgreSQL</span><span class="sk">MySQL</span>
@@ -115,21 +115,21 @@
       </div>
 
       <div class="sblock">
-        <div class="stitle">DevOps · Cloud · IoT</div>
+        <h2 class="stitle">DevOps · Cloud · IoT</h2>
         <div class="sktags">
           <span class="sk">Docker</span><span class="sk">AWS</span><span class="sk">Azure</span><span class="sk">Git</span><span class="sk">CI/CD</span><span class="sk">Hardware</span>
         </div>
       </div>
 
       <div class="sblock">
-        <div class="stitle">AI · Automation</div>
+        <h2 class="stitle">AI · Automation</h2>
         <div class="sktags">
           <span class="sk hi">MCP Servers</span><span class="sk hi">AI Agents</span><span class="sk">n8n</span>
         </div>
       </div>
 
       <div class="sblock">
-        <div class="stitle">Education</div>
+        <h2 class="stitle">Education</h2>
         <div class="edu">
           <div class="edu-t">Systems Engineering</div>
           <div class="edu-i">ITM — Inst. Tecnologico Metropolitano</div>
@@ -143,7 +143,7 @@
       </div>
 
       <div class="sblock">
-        <div class="stitle">Certifications</div>
+        <h2 class="stitle">Certifications</h2>
         <div class="cert">
           <span class="cert-t">Azure Fundamentals (AZ-900)</span>
           <span class="cert-d">OCT 2025 ✓</span>
@@ -160,18 +160,18 @@
     <main class="main">
 
       <div class="sblock">
-        <div class="stitle">Profile</div>
+        <h2 class="stitle">Profile</h2>
         <p class="profile">
           Full-stack developer with <strong>2+ years of experience</strong>, comfortable across frontend/mobile and backend. I build products that solve real problems: from a mining traceability system with <strong>50+ users</strong> and physical peripheral integration, to operational and payment platforms in production. Co-founder of <strong>ChronoSoft</strong>. Clean code, good UX, measurable impact.
         </p>
       </div>
 
       <div class="sblock">
-        <div class="stitle">Experience</div>
+        <h2 class="stitle">Experience</h2>
 
         <div class="exp">
           <div class="exp-head">
-            <span class="exp-title">Full-Stack Developer · Sun Valley Investments</span>
+            <h3 class="exp-title">Full-Stack Developer · Sun Valley Investments</h3>
             <span class="exp-date">JUN 2025 — PRESENT</span>
           </div>
           <div class="exp-tags">Flutter · NestJS · PostgreSQL · Azure · WebSockets · IoT/peripherals</div>
@@ -185,7 +185,7 @@
 
         <div class="exp">
           <div class="exp-head">
-            <span class="exp-title">Full-Stack Developer · Coins Tech Colombia</span>
+            <h3 class="exp-title">Full-Stack Developer · Coins Tech Colombia</h3>
             <span class="exp-date">APR 2024 — JUN 2025</span>
           </div>
           <div class="exp-tags">Next.js · React · NestJS · LoopBack · PostgreSQL · AWS · Wompi</div>
@@ -199,7 +199,7 @@
       </div>
 
       <div class="sblock">
-        <div class="stitle">Featured Project</div>
+        <h2 class="stitle">Featured Project</h2>
         <div class="proj">
           <div><span class="proj-title">Co-founder · ChronoSoft</span><span class="proj-badge">Founder</span></div>
           <p>Software startup for parking management and point-of-sale systems. I lead the team: product architecture, technical decisions, and delivery.</p>
