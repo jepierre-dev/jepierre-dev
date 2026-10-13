@@ -16,3 +16,7 @@ playwright-report/
 *.log
 Thumbs.db
 Desktop.ini
+
+# Capturas y artefactos de verificación
+shots/
+.playwright-mcp/
