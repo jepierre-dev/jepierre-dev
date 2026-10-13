@@ -126,6 +126,26 @@ docs/superpowers/specs/   # este documento
   `prefers-reduced-motion`, y comprobar que el canvas del JO y el rail de
   capítulos siguen funcionando.
 
+## Ajustes tras la revisión de diseño (2026-10-13)
+
+Aprobados por el usuario sobre la misma rama, sustituyen a lo anterior donde
+difieren:
+
+- Cámara: la ventana del `viewBox` se centra en el punto de pantalla de la pieza
+  en X **e Y**, con proporción 16:9 en escritorio y 5:4 en móvil, sin salirse
+  del dibujo; en pausa se ve la línea entera.
+- Columna de texto: índice de los seis pasos (número y título siempre
+  visibles; solo el párrafo del paso activo desplegado), con un riel de 1 px
+  que se llena en `--lilac` hasta la fila activa. En móvil el mismo índice,
+  compacto, bajo la tarjeta.
+- Marco de la tarjeta: `Fig. 2 Línea de ensamble` a la izquierda y una barra de
+  seis segmentos a la derecha (sustituye al readout `0n / 06`); la pista
+  "Desplázate" se desvanece tras el primer paso.
+- Paleta del módulo más luminosa (líneas `#e6e0d4 / #8f8b9a / #57545f`, caras
+  `#1a1a26`), acento `--lilac` solo en la pieza.
+- Accesibilidad: región viva `#approach-status` ("Paso n de 6: título", i18n);
+  el SVG no está `aria-hidden`.
+
 ## Fuera de alcance
 
 - WebGL, 3D, tema claro, cambios en `scene.js`, cambios en otras secciones,

@@ -27,6 +27,7 @@ test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
     ["eval", "window.__approach.update({ progress: 6, paused: true }); 'F:' + document.querySelector('[data-part=runner]').getAttribute('transform')"],
     ["eval", "window.__approach.update({ progress: 6, paused: true }); 'H:' + document.querySelector('svg').getAttribute('viewBox')"],
     ["eval", "window.__approach.update({ progress: 2, paused: false }); window.__approach.setNarrow(true); 'G:' + document.querySelector('svg').getAttribute('viewBox')"],
+    ["eval", "window.__approach.update({ progress: 6, paused: true }); window.__approach.update({ progress: 6, paused: false }); window.__approach.setNarrow(false); 'I:' + document.querySelector('svg').getAttribute('viewBox')"],
   ]);
   assert.match(out, /A:translate\(0 0\)/, `en p=0 la pieza está en reposo\n${out}`);
   const moved = out.match(/B:translate\((-?[\d.]+) (-?[\d.]+)\)/);
@@ -42,4 +43,11 @@ test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
   const box = out.match(/G:(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+)/);
   assert.ok(box, `viewBox escrito\n${out}`);
   assert.ok(Number(box[3]) < 1240 * 0.5, `viewBox estrecho en modo narrow: ${box[3]}`);
+  // La cámara se centra en la pieza también en Y: al final de la línea (abajo a la
+  // derecha del dibujo) la ventana baja y es más baja que el dibujo entero.
+  const end = out.match(/I:(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+)/);
+  assert.ok(end, `viewBox final escrito\n${out}`);
+  assert.ok(Number(end[2]) > 20, `la ventana baja hacia la pieza en Y: y=${end[2]}`);
+  assert.ok(Number(end[4]) < 520, `la ventana es más baja que el dibujo: h=${end[4]}`);
+  assert.ok(Math.abs(Number(end[3]) / Number(end[4]) - 16 / 9) < 0.02, `ventana 16:9 en escritorio: ${end[3]}×${end[4]}`);
 });

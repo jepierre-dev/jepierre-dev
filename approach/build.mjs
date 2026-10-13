@@ -47,10 +47,10 @@ const modelSource = readFileSync(join(HERE, "model.mjs"), "utf8").replace(/^expo
 // La paleta del sitio sobre las variables del kit (solo tema oscuro).
 const CSS = `
 .approach-figure.iso{
-  --anatomy-paper:#0c0c14;--anatomy-face:#15151f;--anatomy-top:#181824;
-  --anatomy-shade-0:#0a0a11;--anatomy-shade-1:#0e0e16;--anatomy-shade-2:#12121b;--anatomy-shade-3:#161620;
-  --anatomy-lit-top:#2a2f2a;--anatomy-lit-shade:#1f241f;
-  --anatomy-hi:#d8d2c6;--anatomy-mid:#7a7784;--anatomy-lo:#4a4854;--anatomy-faint:#35333e;--anatomy-lit:#b6f09c;
+  --anatomy-paper:#0c0c14;--anatomy-face:#1a1a26;--anatomy-top:#1f1f2c;
+  --anatomy-shade-0:#0f0f18;--anatomy-shade-1:#13131d;--anatomy-shade-2:#171722;--anatomy-shade-3:#1b1b27;
+  --anatomy-lit-top:#2c322c;--anatomy-lit-shade:#212721;
+  --anatomy-hi:#e6e0d4;--anatomy-mid:#8f8b9a;--anatomy-lo:#57545f;--anatomy-faint:#3a3845;--anatomy-lit:#b6f09c;
   --anatomy-halo:#000000;--anatomy-halo-opacity:.8;--anatomy-dot:#f3eadb;--anatomy-green:#b6f09c;
 }
 .approach-figure{overflow:hidden}
@@ -95,17 +95,20 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
     press: q('[data-part="press"]'), needle: q('[data-part="needle"]'), door: q('[data-part="door"]'),
     led: q('[data-part="led"]'), meter: q('[data-part="meter"]'), runner: q('[data-part="runner"]'),
   };
-  const screenXOf = (worldX) => iso([worldX, 0, BELT_TOP], P)[0];
   let target = 0, shown = 0, paused = false, isNarrow = narrow;
   let frame = 0, last = 0, visible = true, lastStep = -1, lastSheet = -1, lastBox = "";
 
+  // La ventana de la cámara se centra en el punto de pantalla de la pieza, en X y en Y,
+  // con la proporción de la caja (16:9 escritorio, 5:4 móvil) y sin salirse del dibujo.
+  // En pausa (sin movimiento) la figura es una ilustración estática: se ve la línea entera.
   function viewBoxFor(progress) {
     const state = stateAt(progress);
-    // En pausa (sin movimiento) la figura es una ilustración estática: se ve la línea entera.
-    const share = paused ? 1 : isNarrow ? WINDOW.narrow : WINDOW.wide;
-    const w = WIDTH * share, h = HEIGHT * (isNarrow && !paused ? 0.78 : 1);
-    const cx = Math.min(WIDTH - w / 2, Math.max(w / 2, screenXOf(state.viewX)));
-    return { cx, w, h };
+    const [sx, sy] = iso([state.viewX, 0, BELT_TOP], P);
+    const w = paused ? WIDTH : WIDTH * (isNarrow ? WINDOW.narrow : WINDOW.wide);
+    const h = paused ? HEIGHT : isNarrow ? w * 4 / 5 : w * 9 / 16;
+    const cx = Math.min(WIDTH - w / 2, Math.max(w / 2, sx));
+    const cy = Math.min(HEIGHT - h / 2, Math.max(h / 2, sy));
+    return { x: cx - w / 2, y: cy - h / 2, w, h };
   }
 
   function draw(progress) {
@@ -128,7 +131,7 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
     parts.runner.setAttribute("transform", translateAlong(P, [-(STATIONS[5] - STATIONS[0]) * s.returnT, 0, 0]));
     if (s.step !== lastStep) { host.dataset.step = String(s.step); lastStep = s.step; }
     const box = viewBoxFor(progress);
-    const value = (box.cx - box.w / 2).toFixed(1) + " " + ((HEIGHT - box.h) / 2).toFixed(1) + " " + box.w.toFixed(1) + " " + box.h.toFixed(1);
+    const value = box.x.toFixed(1) + " " + box.y.toFixed(1) + " " + box.w.toFixed(1) + " " + box.h.toFixed(1);
     if (value !== lastBox) { svg.setAttribute("viewBox", value); lastBox = value; }
   }
 
@@ -149,10 +152,11 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
   draw(0);
   return {
     update({ progress, paused: nextPaused } = {}) {
+      const wasPaused = paused;
       if (typeof nextPaused === "boolean") paused = nextPaused;
+      if (paused !== wasPaused) lastBox = "";
       if (Number.isFinite(progress)) target = Math.min(STEPS, Math.max(0, progress));
-      if (paused) { shown = target; lastBox = ""; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
-      lastBox = "";
+      if (paused) { shown = target; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
       run();
     },
     setNarrow(value) { isNarrow = Boolean(value); lastBox = ""; draw(shown); },

@@ -27,8 +27,18 @@ test("los cuadros entran con fade (WAAPI) y los inactivos salen del árbol de ac
   assert.ok(showStep, "falta showStep");
   assert.match(showStep[1], /\.animate\(/, "showStep debe animar la entrada del cuadro activo");
   assert.match(showStep[1], /animations\.add\(/, "la animación entra al Set para que motion-off la cancele");
-  assert.match(html, /html\.approach-live \.approach-captions li \{[^}]*visibility:\s*hidden/);
-  assert.match(html, /html\.approach-live \.approach-captions li\[data-active\] \{[^}]*visibility:\s*visible/);
+  // Índice de pasos: todos los títulos visibles, solo el párrafo activo desplegado.
+  assert.match(html, /html\.approach-live \.approach-captions li:not\(\[data-active\]\) p \{[^}]*display:\s*none/);
+});
+
+test("la tarjeta lleva título, barra de progreso de seis segmentos y la pista se desvanece tras el primer paso", () => {
+  assert.match(html, /approachFigTitle: 'Línea de ensamble'/);
+  assert.match(html, /approachFigTitle: 'Assembly line'/);
+  const bar = html.match(/<span class="approach-progress"[^>]*>([\s\S]*?)<\/span>/);
+  assert.ok(bar, "falta .approach-progress");
+  assert.equal((bar[1].match(/<i>/g) || []).length, 6);
+  assert.match(html, /\.approach-figure:not\(\[data-step="0"\]\) ~ \.approach-hint \{[^}]*opacity:\s*0/);
+  assert.match(html, /class="approach-rail-fill"/);
 });
 
 test("la región viva anuncia el paso y el SVG con role=img no queda oculto", () => {
