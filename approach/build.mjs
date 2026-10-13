@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import * as k from "./kit/iso-kit.mjs";
 import * as G from "./geometry.mjs";
 import { STATION_X, STEPS } from "./model.mjs";
+import { stations } from "./stations.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -17,7 +18,8 @@ const decks = [];
 for (let n = 0; n < STEPS; n++) decks.push({ depth: k.depthOf([STATION_X[n], G.DECK.y, 0], G.P), svg: G.deck(n) });
 decks.sort((a, b) => a.depth - b.depth);
 
-const svg = G.svgBody([G.base(), ...decks.map((d) => d.svg), G.belt()], LABEL);
+const { back, front } = stations();
+const svg = G.svgBody([G.base(), ...decks.map((d) => d.svg), ...back, G.belt(), ...front], LABEL);
 
 const kitSource = readFileSync(join(HERE, "kit", "iso-kit.mjs"), "utf8").replace(/^export /gm, "");
 const modelSource = readFileSync(join(HERE, "model.mjs"), "utf8").replace(/^export /gm, "");
