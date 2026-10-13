@@ -39,6 +39,8 @@ const svg = G.svgBody([
   moving.runner, moving.door, moving.led, moving.lamp, moving.needle, moving.meter,
   G.belt(), pieceForms(), ...front,
   moving.lens, moving.sheet, moving.press,
+  // Capa de estímulos (confeti, chispas, ondas): la dibuja el runtime por frame.
+  `<g data-part="fx" class="iso-fx"></g>`,
 ], LABEL);
 
 const kitSource = readFileSync(join(HERE, "kit", "iso-kit.mjs"), "utf8").replace(/^export /gm, "");
@@ -54,6 +56,10 @@ const CSS = `
   --anatomy-halo:#000000;--anatomy-halo-opacity:.8;--anatomy-dot:#f3eadb;--anatomy-green:#b6f09c;
 }
 .approach-figure{overflow:hidden}
+.approach-figure .iso-fx{pointer-events:none}
+.approach-figure .iso-fx-dot[data-tone="hi"]{fill:var(--anatomy-hi)}
+.approach-figure .iso-fx-dot[data-tone="lit"]{fill:var(--anatomy-lit)}
+.approach-figure .iso-fx-dot[data-tone="mid"]{fill:var(--anatomy-mid)}
 .approach-figure .iso-svg{display:block;width:100%;height:100%;overflow:hidden}
 `;
 
@@ -94,7 +100,29 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
     lamp: q('[data-part="lamp"]'), lens: q('[data-part="lens"]'), sheet: q('[data-part="sheet"]'),
     press: q('[data-part="press"]'), needle: q('[data-part="needle"]'), door: q('[data-part="door"]'),
     led: q('[data-part="led"]'), meter: q('[data-part="meter"]'), runner: q('[data-part="runner"]'),
+    fx: q('[data-part="fx"]'),
   };
+  // Estímulos vivos: { name, start } en segundos de reloj del loop.
+  let clock = 0, lastActions = stateAt(0).actions, events = [];
+  const fine = (v) => Math.round(v * 100) / 100;
+  function fxSvg(item) {
+    const [sx, sy] = iso(item.at, P);
+    const alpha = fine(Math.max(0, Math.min(1, item.alpha)));
+    if (alpha <= 0.01) return "";
+    if (item.kind === "ring") return '<path class="iso-line" data-tone="' + item.tone + '" opacity="' + alpha + '" d="' + ring(item.at[0], item.at[1], item.r, item.at[2], P, 32) + '"/>';
+    if (item.kind === "seg") {
+      const [ex, ey] = iso([item.at[0] + item.dir[0] * item.len, item.at[1] + item.dir[1] * item.len, item.at[2] + item.dir[2] * item.len], P);
+      return '<path class="iso-line" data-tone="' + item.tone + '" opacity="' + alpha + '" style="stroke-width:1.3" d="M' + fine(sx) + ' ' + fine(sy) + 'L' + fine(ex) + ' ' + fine(ey) + '"/>';
+    }
+    return '<circle class="iso-fx-dot" data-tone="' + item.tone + '" opacity="' + alpha + '" cx="' + fine(sx) + '" cy="' + fine(sy) + '" r="' + fine(item.r) + '"/>';
+  }
+  function drawFx(state) {
+    const items = [];
+    for (const event of events) items.push(...particlesOf(event.name, clock - event.start));
+    items.push(...trailOf(state.returnT));
+    const markup = items.map(fxSvg).join("");
+    if (parts.fx.innerHTML !== markup) parts.fx.innerHTML = markup;
+  }
   let target = 0, shown = 0, paused = false, isNarrow = narrow;
   let frame = 0, last = 0, visible = true, lastStep = -1, lastSheet = -1, lastBox = "";
 
@@ -138,9 +166,17 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
   function tick(now) {
     const dt = last ? Math.min((now - last) / 1000, 1 / 30) : 1 / 60;
     last = now;
+    clock += dt;
+    const forward = target > shown;
     shown = paused ? target : advance(shown, target, dt);
     draw(shown);
-    frame = visible && shown !== target ? requestAnimationFrame(tick) : 0;
+    // Estímulos: solo avanzando, nunca en pausa; viven su tiempo y se retiran.
+    const state = stateAt(shown);
+    if (forward && !paused) for (const name of eventsAt(lastActions, state.actions)) events.push({ name, start: clock });
+    lastActions = state.actions;
+    events = events.filter((event) => clock - event.start <= EVENTS[event.name].life);
+    drawFx(state);
+    frame = visible && (shown !== target || events.length || (state.returnT > 0 && state.returnT < 1)) ? requestAnimationFrame(tick) : 0;
   }
   const run = () => { if (!frame && visible) { last = 0; frame = requestAnimationFrame(tick); } };
   const observer = typeof IntersectionObserver === "function"
@@ -155,7 +191,12 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
       if (typeof nextPaused === "boolean") paused = nextPaused;
       if (paused !== wasPaused) lastBox = "";
       if (Number.isFinite(progress)) target = Math.min(STEPS, Math.max(0, progress));
-      if (paused) { shown = target; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
+      if (paused) {
+        shown = target; draw(shown);
+        events = []; lastActions = stateAt(shown).actions; drawFx(stateAt(shown));
+        if (frame) { cancelAnimationFrame(frame); frame = 0; }
+        return;
+      }
       run();
     },
     setNarrow(value) { isNarrow = Boolean(value); lastBox = ""; draw(shown); },

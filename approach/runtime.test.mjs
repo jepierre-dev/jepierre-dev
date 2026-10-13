@@ -28,7 +28,21 @@ test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
     ["eval", "window.__approach.update({ progress: 6, paused: true }); 'H:' + document.querySelector('svg').getAttribute('viewBox')"],
     ["eval", "window.__approach.update({ progress: 2, paused: false }); window.__approach.setNarrow(true); 'G:' + document.querySelector('svg').getAttribute('viewBox')"],
     ["eval", "window.__approach.update({ progress: 6, paused: true }); window.__approach.update({ progress: 6, paused: false }); window.__approach.setNarrow(false); 'I:' + document.querySelector('svg').getAttribute('viewBox')"],
+    ["eval", "window.__approach.update({ progress: 4, paused: true }); window.__approach.update({ progress: 5, paused: false }); 'J:armed'"],
+    ["wait", 1700],
+    ["eval", "'K:fx=' + document.querySelector('[data-part=fx]').childElementCount"],
+    ["wait", 1800],
+    ["eval", "'L:fx=' + document.querySelector('[data-part=fx]').childElementCount"],
+    ["eval", "window.__approach.update({ progress: 4, paused: false }); 'M:back'"],
+    ["wait", 1700],
+    ["eval", "'N:fx=' + document.querySelector('[data-part=fx]').childElementCount"],
   ]);
+  // Estímulos: el confeti aparece al sellar la caja (fase 5 hacia delante), muere
+  // tras su vida, y volver atrás no lo dispara.
+  const fx = (key) => Number((out.match(new RegExp(`${key}:fx=(\\d+)`)) || [])[1]);
+  assert.ok(fx("K") >= 14, `confeti en vuelo tras sellar la caja: ${fx("K")}\n${out}`);
+  assert.equal(fx("L"), 0, "los estímulos mueren tras su vida");
+  assert.equal(fx("N"), 0, "hacia atrás no se dispara nada");
   assert.match(out, /A:translate\(0 0\)/, `en p=0 la pieza está en reposo\n${out}`);
   const moved = out.match(/B:translate\((-?[\d.]+) (-?[\d.]+)\)/);
   assert.ok(moved && Number(moved[1]) > 100, `en p=3.9 la pieza se desplazó\n${out}`);

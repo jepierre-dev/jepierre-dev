@@ -85,3 +85,47 @@ test("advance reproduce una fase a velocidad limitada, llega al objetivo y es si
   assert.equal(shown, 4, "llega en menos de 10 s");
   assert.ok(Number.isFinite(advance(0, 6, NaN)), "dt inválido no produce NaN");
 });
+
+test("eventsAt dispara cada estímulo una sola vez, solo al cruzar su umbral hacia delante", async () => {
+  const { eventsAt, EVENTS } = await import("./model.mjs");
+  const zero = new Array(6).fill(0);
+  const before = [...zero]; before[4] = 0.5;
+  const after = [...zero]; after[4] = 0.95;
+  assert.deepEqual(eventsAt(before, after), ["confetti"]);
+  assert.deepEqual(eventsAt(after, before), [], "hacia atrás no dispara");
+  assert.deepEqual(eventsAt(after, after), [], "sin cruce no dispara");
+  const all = eventsAt(zero, new Array(6).fill(1));
+  for (const name of Object.keys(EVENTS)) assert.ok(all.includes(name), `falta ${name}`);
+});
+
+test("particlesOf: el confeti cae sobre la caja y se desvanece; chispas salen; motas suben", async () => {
+  const { particlesOf, EVENTS } = await import("./model.mjs");
+  const c0 = particlesOf("confetti", 0.05);
+  assert.equal(c0.length, 14);
+  c0.forEach((p) => { assert.ok(p.alpha > 0.5); assert.equal(p.kind, "seg"); });
+  const c1 = particlesOf("confetti", EVENTS.confetti.life * 0.6);
+  for (let i = 0; i < 14; i++) assert.ok(c1[i].at[2] < c0[i].at[2], `la pieza ${i} cae`);
+  particlesOf("confetti", EVENTS.confetti.life * 0.6).forEach((p) => assert.ok(p.at[2] >= 18, "no atraviesa la tapa de la caja"));
+  const end = particlesOf("confetti", EVENTS.confetti.life);
+  end.forEach((p) => assert.ok(p.alpha <= 0.01, "se desvanece al final"));
+  assert.deepEqual(particlesOf("confetti", EVENTS.confetti.life + 0.1), [], "muerto tras su vida");
+  const s0 = particlesOf("sparks", 0.05), s1 = particlesOf("sparks", 0.3);
+  assert.equal(s0.length, 5);
+  for (let i = 0; i < 5; i++) assert.ok(Math.hypot(s1[i].at[0] - 420, s1[i].at[1]) > Math.hypot(s0[i].at[0] - 420, s0[i].at[1]), "las chispas se alejan del pistón");
+  const m0 = particlesOf("motes", 0.1), m1 = particlesOf("motes", 0.8);
+  assert.equal(m0.length, 3);
+  for (let i = 0; i < 3; i++) assert.ok(m1[i].at[2] > m0[i].at[2], "las motas suben");
+  const ring = particlesOf("lamp", 0.4);
+  assert.equal(ring.length, 1); assert.equal(ring[0].kind, "ring"); assert.ok(ring[0].r > 2);
+  assert.ok(particlesOf("pulse", 0.5).every((p) => p.kind === "ring"));
+});
+
+test("trailOf deja una estela detrás del punto de retorno mientras corre", async () => {
+  const { trailOf } = await import("./model.mjs");
+  assert.deepEqual(trailOf(0), []);
+  assert.deepEqual(trailOf(1), []);
+  const dots = trailOf(0.5);
+  assert.equal(dots.length, 6);
+  const runnerX = 660 - 600 * 0.5;
+  dots.forEach((d, i) => { assert.ok(d.at[0] > runnerX, "la estela queda detrás (hacia el inicio del recorrido)"); if (i) assert.ok(d.alpha < dots[i - 1].alpha); });
+});

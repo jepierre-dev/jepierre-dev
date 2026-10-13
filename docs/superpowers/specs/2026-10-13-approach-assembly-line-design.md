@@ -154,6 +154,14 @@ difieren:
   `PHASE_RATE = 0.75` pasos/s (`advance()` en el modelo), también hacia atrás,
   en lugar de ir atada a la posición del scroll.
 
+- Estímulos (aprobados después): eventos de una sola vez al cruzar hacia
+  delante el umbral de la acción de cada estación (`EVENTS`, `eventsAt`,
+  `particlesOf` en el modelo; capa `data-part="fx"` en el SVG): onda en la
+  lámpara, destello en la lupa, motas sobre el plano, chispas al golpear la
+  prensa y pulso del medidor, confeti suave (14 piezas) sobre la caja sellada,
+  latido del punto luminoso y estela del punto de retorno. Nunca en pausa,
+  reduced-motion ni hacia atrás.
+
 ## Fuera de alcance
 
 - WebGL, 3D, tema claro, cambios en `scene.js`, cambios en otras secciones,
