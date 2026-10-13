@@ -72,3 +72,16 @@ test("el viaje es monótono y suave", () => {
     last = x;
   }
 });
+
+test("advance reproduce una fase a velocidad limitada, llega al objetivo y es simétrico", async () => {
+  const { advance, PHASE_RATE } = await import("./model.mjs");
+  assert.ok(PHASE_RATE > 0.5 && PHASE_RATE < 1.2, "una fase dura entre ~0.8 y 2 s");
+  near(advance(0, 1, 0.1), PHASE_RATE * 0.1);
+  near(advance(1, 0, 0.1), 1 - PHASE_RATE * 0.1);
+  assert.equal(advance(0.9, 1, 10), 1, "no se pasa del objetivo");
+  assert.equal(advance(3, 3, 0.016), 3);
+  let shown = 0;
+  for (let t = 0; t < 10; t += 1 / 60) shown = advance(shown, 4, 1 / 60);
+  assert.equal(shown, 4, "llega en menos de 10 s");
+  assert.ok(Number.isFinite(advance(0, 6, NaN)), "dt inválido no produce NaN");
+});

@@ -12,6 +12,16 @@ export const smoothstep = (a, b, x) => {
 };
 export const easeInOut = (t) => smoothstep(0, 1, t);
 
+// Reproducción de una fase a su ritmo: el scroll elige la fase y la figura avanza
+// hacia ella a PHASE_RATE pasos por segundo (también hacia atrás), sin pasarse.
+export const PHASE_RATE = 0.75;
+export function advance(shown, target, dt, rate = PHASE_RATE) {
+  const delta = target - shown;
+  const most = rate * (Number.isFinite(dt) ? Math.max(0, dt) : 0);
+  if (Math.abs(delta) <= most) return target;
+  return shown + Math.sign(delta) * most;
+}
+
 export function stateAt(progress) {
   const p = Number.isFinite(progress) ? clamp(progress, 0, STEPS) : 0;
   const step = Math.min(STEPS - 1, Math.floor(p));

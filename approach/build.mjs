@@ -73,9 +73,9 @@ const CSS = ${JSON.stringify(CSS)};
 const WINDOW = { wide: 0.66, narrow: 0.42 };
 
 // mountApproachFigure(host, { narrow }) → { update({ progress, paused }), setNarrow(bool), dispose() }
-// update fija un objetivo 0..6; un loop sigue el objetivo con follow exponencial y
-// se detiene al asentarse. paused salta al objetivo sin animar. El host recibe
-// data-step con el paso activo.
+// update fija un objetivo 0..6 (el final de la fase activa); un loop reproduce la
+// fase hacia el objetivo a PHASE_RATE pasos/s y se detiene al llegar. paused salta
+// al objetivo sin animar. El host recibe data-step con el paso activo.
 export function mountApproachFigure(host, { narrow = false } = {}) {
   if (!host || !host.ownerDocument) throw new TypeError("mountApproachFigure requires a host element.");
   const doc = host.ownerDocument;
@@ -138,8 +138,7 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
   function tick(now) {
     const dt = last ? Math.min((now - last) / 1000, 1 / 30) : 1 / 60;
     last = now;
-    shown = paused ? target : shown + (target - shown) * (1 - Math.exp(-dt / 0.22));
-    if (Math.abs(target - shown) < 0.0005) shown = target;
+    shown = paused ? target : advance(shown, target, dt);
     draw(shown);
     frame = visible && shown !== target ? requestAnimationFrame(tick) : 0;
   }

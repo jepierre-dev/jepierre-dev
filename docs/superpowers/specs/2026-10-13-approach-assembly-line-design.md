@@ -146,6 +146,14 @@ difieren:
 - Accesibilidad: región viva `#approach-status` ("Paso n de 6: título", i18n);
   el SVG no está `aria-hidden`.
 
+- Scroll por fases (aprobado después): la stage mide `100svh + 6 × 70svh` con
+  siete anclas de `scroll-snap` (seis fases y una de salida) y
+  `scroll-snap-stop: always`; `html.approach-snap` (`scroll-snap-type: y
+  mandatory`) solo está activo mientras el scroll está dentro de la stage. El
+  scroll elige la fase (parada más cercana) y la figura la reproduce a
+  `PHASE_RATE = 0.75` pasos/s (`advance()` en el modelo), también hacia atrás,
+  en lugar de ir atada a la posición del scroll.
+
 ## Fuera de alcance
 
 - WebGL, 3D, tema claro, cambios en `scene.js`, cambios en otras secciones,

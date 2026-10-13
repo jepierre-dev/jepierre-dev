@@ -121,9 +121,12 @@
     .history h3 { font-size: 1.15rem; letter-spacing: -.025em; }
     .history p { font-size: .9rem; margin-top: 12px; }
     .date { display: block; font-size: .7rem; color: var(--cyan); margin-bottom: 10px; }
-    /* Línea de ensamble: la stage mide seis pantallas y el pin queda fijo mientras
-       el scroll avanza la figura. Alturas en svh para la barra del navegador móvil. */
-    .approach-stage { position: relative; z-index: 4; height: calc(6 * 100svh); margin-top: 36px; }
+    /* Línea de ensamble: el pin queda fijo mientras el scroll recorre siete paradas
+       (seis fases y la salida) a 70svh entre sí; el snap solo está activo dentro de
+       la stage (html.approach-snap). Alturas en svh para la barra del navegador móvil. */
+    .approach-stage { position: relative; z-index: 4; height: calc(100svh + 6 * 70svh); margin-top: 36px; }
+    .approach-anchor { position: absolute; left: 0; top: calc(var(--i) * 70svh); width: 1px; height: 1px; scroll-snap-align: start; scroll-snap-stop: always; }
+    html.approach-snap { scroll-snap-type: y mandatory; }
     .approach-pin { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: minmax(260px, 38%) 1fr; gap: 32px; align-items: center; padding-bottom: 24px; }
     /* Índice de los seis pasos: un riel a la izquierda que se llena con el progreso,
        todos los títulos visibles y solo el párrafo del paso activo desplegado. */
@@ -155,6 +158,7 @@
     .approach-figure:not([data-step="0"]) ~ .approach-hint { opacity: 0; }
     /* Sin movimiento o sin módulo: sin pin, figura en estado final y los seis cuadros como lista. */
     html.approach-static .approach-stage, html[data-motion="off"] .approach-stage { height: auto; }
+    html.approach-static .approach-anchor, html[data-motion="off"] .approach-anchor { display: none; }
     html.approach-static .approach-pin, html[data-motion="off"] .approach-pin { position: static; height: auto; display: block; }
     html.approach-static .approach-index, html[data-motion="off"] .approach-index { padding-left: 0; max-width: 570px; }
     html.approach-static .approach-index::before, html[data-motion="off"] .approach-index::before,
@@ -339,9 +343,11 @@
         <h2 id="approach-title" data-i18n="approachTitle">Primero entender. Después construir.</h2>
         <p data-i18n="approachBody">No empiezo por un framework. Empiezo por la necesidad, las personas y el contexto donde el software va a vivir.</p>
       </div>
-      <!-- Línea de ensamble: seis pantallas de alto, contenido fijo mientras el scroll
-           avanza la animación. Sin movimiento o sin módulo, los seis cuadros son una lista. -->
+      <!-- Línea de ensamble: contenido fijo mientras el scroll para en cada fase y la
+           figura la reproduce. Sin movimiento o sin módulo, los seis cuadros son una lista. -->
       <div class="approach-stage" id="approach-stage">
+        <!-- Paradas del scroll: una por fase y una de salida, a 70svh entre sí. -->
+        <span class="approach-anchor" style="--i: 0" aria-hidden="true"></span><span class="approach-anchor" style="--i: 1" aria-hidden="true"></span><span class="approach-anchor" style="--i: 2" aria-hidden="true"></span><span class="approach-anchor" style="--i: 3" aria-hidden="true"></span><span class="approach-anchor" style="--i: 4" aria-hidden="true"></span><span class="approach-anchor" style="--i: 5" aria-hidden="true"></span><span class="approach-anchor" style="--i: 6" aria-hidden="true"></span>
         <div class="approach-pin">
           <div class="approach-index">
           <p class="visually-hidden" id="approach-status" aria-live="polite"></p>
@@ -609,10 +615,13 @@
       const progress = chapter === positions.length - 1 ? 0 : Math.max(0, Math.min(1, (y - positions[chapter]) / Math.max(1, distance)));
       scene?.update({ chapter, progress, paused: motionOff() });
       if (figure) {
-        const approach = motionOff() ? 6 : 6 * Math.max(0, Math.min(1, (y - stageTop) / stageSpan));
-        figure.update({ progress: approach, paused: motionOff() });
-        const step = Math.min(5, Math.floor(approach));
+        // El scroll elige la fase (parada más cercana); la figura reproduce esa fase hasta su final.
+        const off = motionOff();
+        const approach = off ? 6 : 6 * Math.max(0, Math.min(1, (y - stageTop) / stageSpan));
+        const step = Math.min(5, Math.round(approach));
+        figure.update({ progress: off ? 6 : Math.min(6, step + 1), paused: off });
         if (!captions[step].hasAttribute('data-active')) showStep(step);
+        root.classList.toggle('approach-snap', !off && y >= stageTop && y <= stageTop + stageSpan);
       }
       railLinks.forEach((link, index) => { if (index === chapter) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current'); });
       const total = Math.max(1, document.documentElement.scrollHeight - innerHeight);

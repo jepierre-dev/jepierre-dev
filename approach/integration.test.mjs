@@ -47,3 +47,11 @@ test("la región viva anuncia el paso y el SVG con role=img no queda oculto", ()
   assert.match(html, /id="approach-status"[^>]*aria-live="polite"/);
   assert.match(html, /approachStatus:/, "texto i18n del anuncio");
 });
+
+test("el scroll de la sección va por fases: anclas de snap solo dentro de la stage", () => {
+  assert.equal((html.match(/class="approach-anchor"/g) || []).length, 7, "6 fases + salida");
+  assert.match(html, /html\.approach-snap \{[^}]*scroll-snap-type:\s*y mandatory/);
+  assert.match(html, /\.approach-anchor \{[^}]*scroll-snap-stop:\s*always/);
+  assert.match(html, /\.approach-stage \{[^}]*height:\s*calc\(100svh \+ 6 \* 70svh\)/);
+  assert.match(html, /classList\.toggle\('approach-snap'/);
+});
