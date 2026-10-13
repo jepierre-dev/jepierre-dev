@@ -53,7 +53,8 @@ const CSS = `
   --anatomy-hi:#d8d2c6;--anatomy-mid:#7a7784;--anatomy-lo:#4a4854;--anatomy-faint:#35333e;--anatomy-lit:#b6f09c;
   --anatomy-halo:#000000;--anatomy-halo-opacity:.8;--anatomy-dot:#f3eadb;--anatomy-green:#b6f09c;
 }
-.approach-figure .iso-svg{display:block;width:100%;height:100%;overflow:visible}
+.approach-figure{overflow:hidden}
+.approach-figure .iso-svg{display:block;width:100%;height:100%;overflow:hidden}
 `;
 
 const runtime = `
@@ -69,7 +70,7 @@ const sheetAt = ${ST.sheetAt.toString()};
 const needleAt = ${ST.needleAt.toString()};
 const meterAt = ${ST.meterAt.toString()};
 const CSS = ${JSON.stringify(CSS)};
-const WINDOW = { wide: 0.82, narrow: 0.42 };
+const WINDOW = { wide: 0.66, narrow: 0.42 };
 
 // mountApproachFigure(host, { narrow }) → { update({ progress, paused }), setNarrow(bool), dispose() }
 // update fija un objetivo 0..6; un loop sigue el objetivo con follow exponencial y
@@ -100,8 +101,9 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
 
   function viewBoxFor(progress) {
     const state = stateAt(progress);
-    const share = isNarrow ? WINDOW.narrow : WINDOW.wide;
-    const w = WIDTH * share, h = HEIGHT * (isNarrow ? 0.78 : 1);
+    // En pausa (sin movimiento) la figura es una ilustración estática: se ve la línea entera.
+    const share = paused ? 1 : isNarrow ? WINDOW.narrow : WINDOW.wide;
+    const w = WIDTH * share, h = HEIGHT * (isNarrow && !paused ? 0.78 : 1);
     const cx = Math.min(WIDTH - w / 2, Math.max(w / 2, screenXOf(state.viewX)));
     return { cx, w, h };
   }
@@ -149,7 +151,8 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
     update({ progress, paused: nextPaused } = {}) {
       if (typeof nextPaused === "boolean") paused = nextPaused;
       if (Number.isFinite(progress)) target = Math.min(STEPS, Math.max(0, progress));
-      if (paused) { shown = target; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
+      if (paused) { shown = target; lastBox = ""; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
+      lastBox = "";
       run();
     },
     setNarrow(value) { isNarrow = Boolean(value); lastBox = ""; draw(shown); },

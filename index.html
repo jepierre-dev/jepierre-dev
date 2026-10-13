@@ -65,9 +65,9 @@
        to sit above the canvas, while section backgrounds remain below it. */
     main { position: relative; }
     footer { position: relative; z-index: 5; }
-    .copy, .history, .approach-list, .hero-foot, .chapter > .eyebrow,
+    .copy, .history, .approach-captions, .hero-foot, .chapter > .eyebrow,
     .section-top, .capabilities, .work-list { position: relative; z-index: 4; }
-    .scene-ready :is(.copy, .history, .approach-list, .hero-foot, .chapter > .eyebrow,
+    .scene-ready :is(.copy, .history, .approach-captions, .hero-foot, .chapter > .eyebrow,
       .section-top, .capabilities, .work-list)::after {
       content: ''; position: absolute; inset: -18px; z-index: -1;
       pointer-events: none; border-radius: 32px; background: var(--bg);
@@ -111,11 +111,32 @@
     .history h3 { font-size: 1.15rem; letter-spacing: -.025em; }
     .history p { font-size: .9rem; margin-top: 12px; }
     .date { display: block; font-size: .7rem; color: var(--cyan); margin-bottom: 10px; }
-    .approach-list { padding: 0; margin: 36px 0 0; list-style: none; max-width: 570px; counter-reset: steps; }
-    .approach-list li { display: grid; grid-template-columns: 36px 1fr; gap: 20px; border-top: 1px solid var(--line); padding: 28px 0; counter-increment: steps; }
-    .approach-list li::before { content: '0' counter(steps); font-size: .75rem; color: var(--coral); }
-    .approach-list h3 { font-size: 1.3rem; letter-spacing: -.03em; }
-    .approach-list p { margin-top: 10px; font-size: .95rem; }
+    /* Línea de ensamble: la stage mide seis pantallas y el pin queda fijo mientras
+       el scroll avanza la figura. Alturas en svh para la barra del navegador móvil. */
+    .approach-stage { position: relative; z-index: 4; height: calc(6 * 100svh); margin-top: 36px; }
+    .approach-pin { position: sticky; top: 0; height: 100svh; display: grid; grid-template-columns: minmax(260px, 38%) 1fr; gap: 32px; align-items: center; padding-bottom: 24px; }
+    .approach-captions { position: relative; margin: 0; padding: 0; list-style: none; min-height: 180px; }
+    .approach-captions li { display: grid; grid-template-columns: 36px 1fr; gap: 20px; border-top: 1px solid var(--line); padding: 28px 0; }
+    .approach-captions .number { font-size: .75rem; color: var(--coral); }
+    .approach-captions h3 { font-size: 1.3rem; letter-spacing: -.03em; }
+    .approach-captions p { margin-top: 10px; font-size: .95rem; grid-column: 2; }
+    html.approach-live .approach-captions li { position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; pointer-events: none; }
+    html.approach-live .approach-captions li[data-active] { opacity: 1; pointer-events: auto; }
+    .approach-card { margin: 0; position: relative; border: 1px solid var(--line); border-radius: 20px; padding: 18px 18px 14px; background: #0c0c14; min-height: 0; }
+    .scene-ready .approach-card::after { content: ''; position: absolute; inset: -18px; z-index: -1; border-radius: 32px; background: var(--bg); filter: blur(20px); }
+    .approach-meta, .approach-hint { display: flex; justify-content: space-between; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .approach-readout { font-variant-numeric: tabular-nums; color: var(--lilac); }
+    /* La caja sigue la proporción de la ventana del viewBox (66 % del ancho en escritorio, 42 % × 78 % en móvil). */
+    .approach-figure { aspect-ratio: 818 / 520; max-height: 62svh; margin: 12px 0; }
+    .approach-hint { margin-top: 8px; }
+    /* Sin movimiento o sin módulo: sin pin, figura en estado final y los seis cuadros como lista. */
+    html.approach-static .approach-stage, html[data-motion="off"] .approach-stage { height: auto; }
+    html.approach-static .approach-pin, html[data-motion="off"] .approach-pin { position: static; height: auto; display: block; }
+    html.approach-static .approach-captions li, html[data-motion="off"] .approach-captions li { position: static; opacity: 1; pointer-events: auto; }
+    html.approach-static .approach-card { display: none; }
+    html[data-motion="off"] .approach-card { margin-top: 36px; max-width: 760px; }
+    html[data-motion="off"] .approach-figure { aspect-ratio: 1240 / 520; max-height: none; }
+    html[data-motion="off"] .approach-hint { display: none; }
     .wide { background: transparent; }
     .section-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 36px; max-width: 1100px; }
     .section-top h2 { white-space: pre-line; }
@@ -153,7 +174,7 @@
     @media (max-width: 1100px) {
       .header-inner { gap: 16px; } .nav-links { gap: 16px; }
       .chapter { padding-left: 9vw; padding-right: 6vw; } .chapter::before { left: 9vw; right: 6vw; }
-      .copy, .history, .approach-list { max-width: 52vw; } .chapter-rail { left: 6px; }
+      .copy, .history { max-width: 52vw; } .chapter-rail { left: 6px; }
     }
     @media (min-width: 768px) and (max-height: 820px) {
       .hero h1 { font-size: clamp(4rem, 8vw, 7rem); }
@@ -173,7 +194,14 @@
       .chapter-rail { display: none; }
       .chapter { padding: 85px max(24px, env(safe-area-inset-right)) 85px max(24px, env(safe-area-inset-left)); }
       .chapter::before { left: 24px; right: 24px; }
-      .copy, .history, .approach-list { max-width: 100%; }
+      .copy, .history { max-width: 100%; }
+      .approach-pin { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 12px; align-items: start; padding-top: calc(16px + env(safe-area-inset-top)); }
+      .approach-card { order: -1; padding: 12px 12px 10px; }
+      .approach-figure { aspect-ratio: 521 / 406; max-height: 50svh; margin: 8px 0; }
+      .approach-captions { min-height: 150px; }
+      .approach-captions li { padding: 18px 0; }
+      .approach-captions h3 { font-size: 1.15rem; }
+      .approach-captions p { font-size: .9rem; }
       /* Fit the copy above the fixed 72vh monogram without moving its flyby canvas. */
       .hero { min-height: 100svh; display: grid; grid-template-rows: auto minmax(28svh, 1fr) auto; padding-top: calc(100px + env(safe-area-inset-top)); padding-bottom: max(24px, env(safe-area-inset-bottom)); }
       .hero .eyebrow { font-size: .65rem; letter-spacing: .1em; margin-bottom: 14px; }
@@ -281,11 +309,25 @@
         <h2 id="approach-title" data-i18n="approachTitle">Primero entender. Después construir.</h2>
         <p data-i18n="approachBody">No empiezo por un framework. Empiezo por la necesidad, las personas y el contexto donde el software va a vivir.</p>
       </div>
-      <ol class="approach-list">
-        <li data-reveal><div><h3 data-i18n="stepOne">Hacer las preguntas correctas</h3><p data-i18n="stepOneBody">Entender la operación y encontrar qué merece ser más simple. Una buena solución empieza por escuchar.</p></div></li>
-        <li data-reveal><div><h3 data-i18n="stepTwo">Conectar las piezas</h3><p data-i18n="stepTwoBody">Diseñar la API, organizar los datos y construir la interfaz como partes de una misma experiencia. También cuando hay hardware de por medio.</p></div></li>
-        <li data-reveal><div><h3 data-i18n="stepThree">Llevarlo al mundo real</h3><p data-i18n="stepThreeBody">Desplegar, cuidar el rendimiento y mejorar con el uso. El producto no termina en el último commit.</p></div></li>
-      </ol>
+      <!-- Línea de ensamble: seis pantallas de alto, contenido fijo mientras el scroll
+           avanza la animación. Sin movimiento o sin módulo, los seis cuadros son una lista. -->
+      <div class="approach-stage" id="approach-stage">
+        <div class="approach-pin">
+          <ol class="approach-captions" aria-live="polite">
+            <li data-step="0"><span class="number">01</span><h3 data-i18n="stepOne">Campo operacional</h3><p data-i18n="stepOneBody">Todo empieza donde pasa el trabajo: personas, máquinas y una necesidad concreta que hoy se resuelve a mano.</p></li>
+            <li data-step="1"><span class="number">02</span><h3 data-i18n="stepTwo">Entender</h3><p data-i18n="stepTwoBody">Preguntar, observar y levantar el proceso real. Una buena solución empieza por escuchar.</p></li>
+            <li data-step="2"><span class="number">03</span><h3 data-i18n="stepThree">Diseñar</h3><p data-i18n="stepThreeBody">Datos, API y pantallas como partes de una misma experiencia. También cuando hay hardware de por medio.</p></li>
+            <li data-step="3"><span class="number">04</span><h3 data-i18n="stepFour">Construir</h3><p data-i18n="stepFourBody">Código simple que aguanta producción, probado antes de salir del banco.</p></li>
+            <li data-step="4"><span class="number">05</span><h3 data-i18n="stepFive">Desplegar</h3><p data-i18n="stepFiveBody">Nube, dispositivos y la gente que lo va a usar. El producto llega a donde vive el trabajo.</p></li>
+            <li data-step="5"><span class="number">06</span><h3 data-i18n="stepSix">Operar y mejorar</h3><p data-i18n="stepSixBody">Medir, cuidar el rendimiento y volver al campo con lo aprendido. No termina en el último commit.</p></li>
+          </ol>
+          <figure class="approach-card">
+            <div class="approach-meta"><span data-i18n="approachFig">Fig 2</span><span class="approach-readout" data-readout>01 / 06</span></div>
+            <div class="approach-figure" aria-hidden="true"></div>
+            <figcaption class="approach-hint" data-i18n="approachHint">Desplázate para avanzar</figcaption>
+          </figure>
+        </div>
+      </div>
     </section>
     <section class="chapter wide" id="stack" aria-labelledby="stack-title">
       <div class="eyebrow"><span class="number">03 /</span><span data-i18n="stackNav">Herramientas</span></div>
@@ -345,9 +387,14 @@
         engineeringDate: '2026 — en curso', engineering: 'Ingeniería en Sistemas · ITM', technology: 'Tecnología en Desarrollo de Software · ITM',
         azureDate: 'Octubre 2025 · Microsoft', kotlinDate: 'Agosto 2023 · Certificación', kotlin: 'Kotlin Avanzado / Android',
         approachTitle: 'Primero entender. Después construir.', approachBody: 'No empiezo por un framework. Empiezo por la necesidad, las personas y el contexto donde el software va a vivir.',
-        stepOne: 'Hacer las preguntas correctas', stepOneBody: 'Entender la operación y encontrar qué merece ser más simple. Una buena solución empieza por escuchar.',
-        stepTwo: 'Conectar las piezas', stepTwoBody: 'Diseñar la API, organizar los datos y construir la interfaz como partes de una misma experiencia. También cuando hay hardware de por medio.',
-        stepThree: 'Llevarlo al mundo real', stepThreeBody: 'Desplegar, cuidar el rendimiento y mejorar con el uso. El producto no termina en el último commit.',
+        stepOne: 'Campo operacional', stepOneBody: 'Todo empieza donde pasa el trabajo: personas, máquinas y una necesidad concreta que hoy se resuelve a mano.',
+        stepTwo: 'Entender', stepTwoBody: 'Preguntar, observar y levantar el proceso real. Una buena solución empieza por escuchar.',
+        stepThree: 'Diseñar', stepThreeBody: 'Datos, API y pantallas como partes de una misma experiencia. También cuando hay hardware de por medio.',
+        stepFour: 'Construir', stepFourBody: 'Código simple que aguanta producción, probado antes de salir del banco.',
+        stepFive: 'Desplegar', stepFiveBody: 'Nube, dispositivos y la gente que lo va a usar. El producto llega a donde vive el trabajo.',
+        stepSix: 'Operar y mejorar', stepSixBody: 'Medir, cuidar el rendimiento y volver al campo con lo aprendido. No termina en el último commit.',
+        approachFig: 'Fig 2', approachHint: 'Desplázate para avanzar',
+        approachLabel: 'Línea de ensamble: de un campo operacional a software en uso, en seis estaciones.',
         stackTitle: 'Distintos lenguajes.\nUna misma intención.', stackBody: 'Elijo las herramientas por lo que resuelven, no por el ruido que hacen.',
         frontTitle: 'Interfaces que se sienten bien', frontBody: 'Frontend y móvil, con atención a la claridad, la consistencia y la experiencia de uso.',
         backTitle: 'Una base que responde', backBody: 'APIs, lógica de negocio y datos para sostener lo que ocurre en la pantalla.',
@@ -381,9 +428,14 @@
         engineeringDate: '2026 — ongoing', engineering: 'Systems Engineering · ITM', technology: 'Software Development Technology · ITM',
         azureDate: 'October 2025 · Microsoft', kotlinDate: 'August 2023 · Certification', kotlin: 'Advanced Kotlin / Android',
         approachTitle: 'Understand first. Then build.', approachBody: 'I don’t start with a framework. I start with the need, the people and the context where the software will live.',
-        stepOne: 'Ask the right questions', stepOneBody: 'Understand the operation and find what deserves to be simpler. A good solution begins with listening.',
-        stepTwo: 'Connect the pieces', stepTwoBody: 'Design the API, organize the data and build the interface as parts of one experience. Even when hardware is involved.',
-        stepThree: 'Bring it into the real world', stepThreeBody: 'Deploy, look after performance and improve through use. The product doesn’t end with the last commit.',
+        stepOne: 'The field', stepOneBody: 'It starts where the work happens: people, machines and a concrete need that is solved by hand today.',
+        stepTwo: 'Understand', stepTwoBody: 'Ask, observe and map the real process. A good solution starts by listening.',
+        stepThree: 'Design', stepThreeBody: 'Data, API and screens as parts of one experience. Hardware included when it is in the loop.',
+        stepFour: 'Build', stepFourBody: 'Simple code that survives production, tested before it leaves the bench.',
+        stepFive: 'Deploy', stepFiveBody: 'Cloud, devices and the people who will use it. The product reaches where the work lives.',
+        stepSix: 'Run and improve', stepSixBody: 'Measure, keep it fast and bring what you learn back to the field. It does not end at the last commit.',
+        approachFig: 'Fig 2', approachHint: 'Scroll to advance',
+        approachLabel: 'Assembly line: from an operational field to software in use, in six stations.',
         stackTitle: 'Different languages.\nThe same intention.', stackBody: 'I choose tools for what they solve, not for the noise they make.',
         frontTitle: 'Interfaces that feel right', frontBody: 'Frontend and mobile, with attention to clarity, consistency and the user experience.',
         backTitle: 'A foundation that delivers', backBody: 'APIs, business logic and data to support what happens on the screen.',
@@ -409,6 +461,17 @@
     const animations = new Set();
     let userPaused = readStorage('motion-paused') === 'true';
     let scene = null, positions = [], scrollFrame = 0, resizeFrame = 0;
+    // Línea de ensamble: el progreso 0..6 sale del scroll dentro de la stage pinneada.
+    let figure = null, stageTop = 0, stageSpan = 1;
+    const stage = document.getElementById('approach-stage');
+    const pin = stage.querySelector('.approach-pin');
+    const captions = [...stage.querySelectorAll('.approach-captions li')];
+    const readout = stage.querySelector('[data-readout]');
+    const narrowQuery = matchMedia('(max-width: 767px)');
+    function showStep(step) {
+      captions.forEach((li, index) => { if (index === step) li.setAttribute('data-active', ''); else li.removeAttribute('data-active'); });
+      readout.textContent = `0${step + 1} / 06`;
+    }
     const storedLang = readStorage('lang');
     let lang = ['es', 'en'].includes(storedLang) ? storedLang : (navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'es');
     const motionOff = () => userPaused || reducedQuery.matches;
@@ -424,6 +487,8 @@
       document.querySelector('#motion-icon').textContent = off ? '▷' : 'Ⅱ';
       if (off) { animations.forEach((animation) => animation.cancel()); animations.clear(); }
       scene?.update({ paused: off });
+      figure?.update({ paused: off, progress: off ? 6 : undefined });
+      scheduleMeasure();
     }
     function setLanguage(next) {
       if (!['es', 'en'].includes(next)) return;
@@ -438,6 +503,7 @@
       document.querySelectorAll('.cv-link').forEach((link) => { link.href = lang === 'es' ? 'Jean_Ortiz_CV.pdf' : 'Jean_Ortiz_CV_EN.pdf'; });
       document.title = dictionary.title;
       document.querySelector('meta[name="description"]').content = dictionary.description;
+      document.querySelector('.approach-figure svg')?.setAttribute('aria-label', dictionary.approachLabel);
       saveStorage('lang', lang);
       updateMotion();
       scheduleMeasure();
@@ -452,6 +518,7 @@
       if (event.key === 'Escape' && menu.classList.contains('open')) { closeMenu(); menuButton.focus(); }
     });
     desktopQuery.addEventListener('change', () => { if (desktopQuery.matches) closeMenu(); scheduleMeasure(); });
+    narrowQuery.addEventListener('change', () => { figure?.setNarrow(narrowQuery.matches); scheduleMeasure(); });
     document.querySelectorAll('[data-lang]').forEach((button) => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
     motionButton.addEventListener('click', () => {
       if (reducedQuery.matches) return;
@@ -482,6 +549,12 @@
       const distance = positions[chapter + 1] - positions[chapter];
       const progress = chapter === positions.length - 1 ? 0 : Math.max(0, Math.min(1, (y - positions[chapter]) / Math.max(1, distance)));
       scene?.update({ chapter, progress, paused: motionOff() });
+      if (figure) {
+        const approach = motionOff() ? 6 : 6 * Math.max(0, Math.min(1, (y - stageTop) / stageSpan));
+        figure.update({ progress: approach, paused: motionOff() });
+        const step = Math.min(5, Math.floor(approach));
+        if (!captions[step].hasAttribute('data-active')) showStep(step);
+      }
       railLinks.forEach((link, index) => { if (index === chapter) link.setAttribute('aria-current', 'location'); else link.removeAttribute('aria-current'); });
       const total = Math.max(1, document.documentElement.scrollHeight - innerHeight);
       document.querySelector('.rail-fill').style.transform = `scaleY(${Math.min(1, y / total)})`;
@@ -490,6 +563,8 @@
       resizeFrame = 0;
       const maxScroll = Math.max(0, document.documentElement.scrollHeight - innerHeight);
       positions = chapters.map((chapter, index) => index === 0 ? 0 : Math.min(maxScroll, chapter.getBoundingClientRect().top + scrollY));
+      stageTop = stage.getBoundingClientRect().top + scrollY;
+      stageSpan = Math.max(1, stage.offsetHeight - pin.offsetHeight);
       updateScroll();
     }
     function scheduleMeasure() { if (!resizeFrame) resizeFrame = requestAnimationFrame(measure); }
@@ -555,8 +630,20 @@
       root.classList.remove('scene-loading');
       console.warn('3D unavailable; the CSS signature remains visible.', error);
     }
+    // La línea de ensamble: si el módulo falla, la sección queda como lista de seis pasos.
+    try {
+      const { mountApproachFigure } = await import('./approach-figure.js');
+      figure = mountApproachFigure(stage.querySelector('.approach-figure'), { narrow: narrowQuery.matches });
+      stage.querySelector('.approach-figure svg')?.setAttribute('aria-label', translations[lang].approachLabel);
+      root.classList.add('approach-live');
+      showStep(0);
+      measure();
+    } catch (error) {
+      root.classList.add('approach-static');
+      console.warn('Approach figure unavailable; the step list remains.', error);
+    }
     addEventListener('pagehide', (event) => {
-      if (!event.persisted) scene?.dispose();
+      if (!event.persisted) { scene?.dispose(); figure?.dispose(); }
     });
   </script>
 </body>

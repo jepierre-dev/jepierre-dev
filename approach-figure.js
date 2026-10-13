@@ -733,8 +733,8 @@ const meterAt = function meterAt(t) {
   const a = (-130 + 200 * t) * Math.PI / 180;
   return lineOnTop([DIAL.cx - Math.sin(a) * 2, DIAL.cy + Math.cos(a) * 2], [DIAL.cx + Math.sin(a) * (DIAL.r - 1.5), DIAL.cy - Math.cos(a) * (DIAL.r - 1.5)], DIAL.z + 0.2, P);
 };
-const CSS = "\n.approach-figure.iso{\n  --anatomy-paper:#0c0c14;--anatomy-face:#15151f;--anatomy-top:#181824;\n  --anatomy-shade-0:#0a0a11;--anatomy-shade-1:#0e0e16;--anatomy-shade-2:#12121b;--anatomy-shade-3:#161620;\n  --anatomy-lit-top:#2a2f2a;--anatomy-lit-shade:#1f241f;\n  --anatomy-hi:#d8d2c6;--anatomy-mid:#7a7784;--anatomy-lo:#4a4854;--anatomy-faint:#35333e;--anatomy-lit:#b6f09c;\n  --anatomy-halo:#000000;--anatomy-halo-opacity:.8;--anatomy-dot:#f3eadb;--anatomy-green:#b6f09c;\n}\n.approach-figure .iso-svg{display:block;width:100%;height:100%;overflow:visible}\n";
-const WINDOW = { wide: 0.82, narrow: 0.42 };
+const CSS = "\n.approach-figure.iso{\n  --anatomy-paper:#0c0c14;--anatomy-face:#15151f;--anatomy-top:#181824;\n  --anatomy-shade-0:#0a0a11;--anatomy-shade-1:#0e0e16;--anatomy-shade-2:#12121b;--anatomy-shade-3:#161620;\n  --anatomy-lit-top:#2a2f2a;--anatomy-lit-shade:#1f241f;\n  --anatomy-hi:#d8d2c6;--anatomy-mid:#7a7784;--anatomy-lo:#4a4854;--anatomy-faint:#35333e;--anatomy-lit:#b6f09c;\n  --anatomy-halo:#000000;--anatomy-halo-opacity:.8;--anatomy-dot:#f3eadb;--anatomy-green:#b6f09c;\n}\n.approach-figure{overflow:hidden}\n.approach-figure .iso-svg{display:block;width:100%;height:100%;overflow:hidden}\n";
+const WINDOW = { wide: 0.66, narrow: 0.42 };
 
 // mountApproachFigure(host, { narrow }) → { update({ progress, paused }), setNarrow(bool), dispose() }
 // update fija un objetivo 0..6; un loop sigue el objetivo con follow exponencial y
@@ -765,8 +765,9 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
 
   function viewBoxFor(progress) {
     const state = stateAt(progress);
-    const share = isNarrow ? WINDOW.narrow : WINDOW.wide;
-    const w = WIDTH * share, h = HEIGHT * (isNarrow ? 0.78 : 1);
+    // En pausa (sin movimiento) la figura es una ilustración estática: se ve la línea entera.
+    const share = paused ? 1 : isNarrow ? WINDOW.narrow : WINDOW.wide;
+    const w = WIDTH * share, h = HEIGHT * (isNarrow && !paused ? 0.78 : 1);
     const cx = Math.min(WIDTH - w / 2, Math.max(w / 2, screenXOf(state.viewX)));
     return { cx, w, h };
   }
@@ -814,7 +815,8 @@ export function mountApproachFigure(host, { narrow = false } = {}) {
     update({ progress, paused: nextPaused } = {}) {
       if (typeof nextPaused === "boolean") paused = nextPaused;
       if (Number.isFinite(progress)) target = Math.min(STEPS, Math.max(0, progress));
-      if (paused) { shown = target; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
+      if (paused) { shown = target; lastBox = ""; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
+      lastBox = "";
       run();
     },
     setNarrow(value) { isNarrow = Boolean(value); lastBox = ""; draw(shown); },

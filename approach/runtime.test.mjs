@@ -25,7 +25,8 @@ test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
     ["eval", "'D:' + (Number(document.querySelector('[data-form=\"3\"]').getAttribute('opacity')) > 0.8)"],
     ["eval", "'E:' + document.querySelector('[data-part=press]').getAttribute('transform')"],
     ["eval", "window.__approach.update({ progress: 6, paused: true }); 'F:' + document.querySelector('[data-part=runner]').getAttribute('transform')"],
-    ["eval", "window.__approach.setNarrow(true); window.__approach.update({ progress: 2, paused: true }); 'G:' + document.querySelector('svg').getAttribute('viewBox')"],
+    ["eval", "window.__approach.update({ progress: 6, paused: true }); 'H:' + document.querySelector('svg').getAttribute('viewBox')"],
+    ["eval", "window.__approach.update({ progress: 2, paused: false }); window.__approach.setNarrow(true); 'G:' + document.querySelector('svg').getAttribute('viewBox')"],
   ]);
   assert.match(out, /A:translate\(0 0\)/, `en p=0 la pieza está en reposo\n${out}`);
   const moved = out.match(/B:translate\((-?[\d.]+) (-?[\d.]+)\)/);
@@ -36,6 +37,8 @@ test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
   assert.ok(press && Number(press[2]) > 1, `la prensa bajó en p=3.9\n${out}`);
   const runner = out.match(/F:translate\((-?[\d.]+) (-?[\d.]+)\)/);
   assert.ok(runner && Number(runner[1]) < -100, `el punto volvió por el riel en p=6\n${out}`);
+  const full = out.match(/H:(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+)/);
+  assert.ok(full && Number(full[3]) === 1240, `en pausa se ve la línea entera\n${out}`);
   const box = out.match(/G:(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+)/);
   assert.ok(box, `viewBox escrito\n${out}`);
   assert.ok(Number(box[3]) < 1240 * 0.5, `viewBox estrecho en modo narrow: ${box[3]}`);
