@@ -31,9 +31,11 @@ export const EVENTS = {
   motes: { station: 2, at: 0.6, life: 1.1 },
   sparks: { station: 3, at: 0.9, life: 0.6 },
   gauge: { station: 3, at: 0.98, life: 0.7 },
-  confetti: { station: 4, at: 0.9, life: 1.3 },
+  confetti: { station: 4, at: 0.9, life: 1.6 },
   pulse: { station: 5, at: 0.9, life: 1.0 },
+  finale: { station: 5, at: 0.97, life: 1.8 },
 };
+const CONFETTI_PIECES = 22;
 export function eventsAt(before, after) {
   return Object.keys(EVENTS).filter((name) => {
     const { station, at } = EVENTS[name];
@@ -88,15 +90,18 @@ export function particlesOf(name, age) {
     }
   } else if (name === "gauge") {
     out.push({ kind: "ring", at: GAUGE_AT, r: 9.6 + 4 * easeInOut(u), alpha: 0.8 * fadeOut(u, 0.3), tone: "lit" });
-  } else if (name === "confetti") {
-    for (let i = 0; i < 14; i++) {
+  } else if (name === "confetti" || name === "finale") {
+    // Confeti sobre la caja sellada (y, como cierre, sobre el punto luminoso): sale
+    // hacia arriba, cae con gravedad hasta la tapa, deriva y gira.
+    const origin = name === "confetti" ? CRATE : [GLOW[0], GLOW[1], GLOW[2] + 1];
+    for (let i = 0; i < CONFETTI_PIECES; i++) {
       const rnd = random(101 + i);
-      const x0 = CRATE[0] - 7 + 14 * rnd(), y0 = CRATE[1] - 6 + 12 * rnd();
-      const vz = 10 + 14 * rnd(), drift = -4 + 8 * rnd(), spin = 2 + 5 * rnd();
+      const x0 = origin[0] - 9 + 18 * rnd(), y0 = origin[1] - 7 + 14 * rnd();
+      const vz = 12 + 18 * rnd(), drift = -5 + 10 * rnd(), spin = 2 + 5 * rnd();
       const t = age;
-      const z = Math.max(CRATE[2], CRATE[2] + 18 + vz * t - 42 * t * t);
+      const z = Math.max(origin[2], origin[2] + 20 + vz * t - 40 * t * t);
       const a = spin * t + i;
-      out.push({ kind: "seg", at: [x0 + drift * t, y0 + 2 * Math.sin(a), z], dir: [Math.cos(a), Math.sin(a), 0.3 * Math.sin(a * 1.3)], len: 2.6, alpha: fadeOut(u, 0.6), tone: ["lit", "hi", "mid"][i % 3] });
+      out.push({ kind: "seg", at: [x0 + drift * t, y0 + 2 * Math.sin(a), z], dir: [Math.cos(a), Math.sin(a), 0.3 * Math.sin(a * 1.3)], len: 3.2, alpha: fadeOut(u, 0.6), tone: ["lit", "hi", "mid"][i % 3] });
     }
   } else if (name === "pulse") {
     const beat = Math.pow(Math.sin(u * Math.PI * 2), 2);

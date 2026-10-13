@@ -101,10 +101,10 @@ test("eventsAt dispara cada estímulo una sola vez, solo al cruzar su umbral hac
 test("particlesOf: el confeti cae sobre la caja y se desvanece; chispas salen; motas suben", async () => {
   const { particlesOf, EVENTS } = await import("./model.mjs");
   const c0 = particlesOf("confetti", 0.05);
-  assert.equal(c0.length, 14);
+  assert.equal(c0.length, 22);
   c0.forEach((p) => { assert.ok(p.alpha > 0.5); assert.equal(p.kind, "seg"); });
   const c1 = particlesOf("confetti", EVENTS.confetti.life * 0.6);
-  for (let i = 0; i < 14; i++) assert.ok(c1[i].at[2] < c0[i].at[2], `la pieza ${i} cae`);
+  for (let i = 0; i < 22; i++) assert.ok(c1[i].at[2] < c0[i].at[2], `la pieza ${i} cae`);
   particlesOf("confetti", EVENTS.confetti.life * 0.6).forEach((p) => assert.ok(p.at[2] >= 18, "no atraviesa la tapa de la caja"));
   const end = particlesOf("confetti", EVENTS.confetti.life);
   end.forEach((p) => assert.ok(p.alpha <= 0.01, "se desvanece al final"));
@@ -118,6 +118,10 @@ test("particlesOf: el confeti cae sobre la caja y se desvanece; chispas salen; m
   const ring = particlesOf("lamp", 0.4);
   assert.equal(ring.length, 1); assert.equal(ring[0].kind, "ring"); assert.ok(ring[0].r > 2);
   assert.ok(particlesOf("pulse", 0.5).every((p) => p.kind === "ring"));
+  const fin = particlesOf("finale", 0.05);
+  assert.equal(fin.length, 22, "el cierre repite el confeti sobre el punto luminoso");
+  fin.forEach((p) => assert.ok(Math.abs(p.at[0] - 660) < 12 && p.at[2] >= 11));
+  assert.ok(EVENTS.finale.station === 5 && EVENTS.finale.at > EVENTS.pulse.at, "dispara después del latido");
 });
 
 test("trailOf deja una estela detrás del punto de retorno mientras corre", async () => {

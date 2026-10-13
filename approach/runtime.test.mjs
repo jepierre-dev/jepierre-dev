@@ -40,7 +40,7 @@ test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
   // Estímulos: el confeti aparece al sellar la caja (fase 5 hacia delante), muere
   // tras su vida, y volver atrás no lo dispara.
   const fx = (key) => Number((out.match(new RegExp(`${key}:fx=(\\d+)`)) || [])[1]);
-  assert.ok(fx("K") >= 14, `confeti en vuelo tras sellar la caja: ${fx("K")}\n${out}`);
+  assert.ok(fx("K") >= 22, `confeti en vuelo tras sellar la caja: ${fx("K")}\n${out}`);
   assert.equal(fx("L"), 0, "los estímulos mueren tras su vida");
   assert.equal(fx("N"), 0, "hacia atrás no se dispara nada");
   assert.match(out, /A:translate\(0 0\)/, `en p=0 la pieza está en reposo\n${out}`);
