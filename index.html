@@ -10,6 +10,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;450;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="modulepreload" href="approach-figure.js">
+  <noscript>
+    <style>
+      /* Sin JavaScript la sección "Cómo trabajo" es la lista de seis pasos. */
+      .approach-stage { height: auto; }
+      .approach-pin { position: static; height: auto; display: block; }
+      .approach-captions li { position: static; visibility: visible; }
+      .approach-card { display: none; }
+    </style>
+  </noscript>
   <style>
     :root {
       color-scheme: dark;
@@ -120,8 +130,10 @@
     .approach-captions .number { font-size: .75rem; color: var(--coral); }
     .approach-captions h3 { font-size: 1.3rem; letter-spacing: -.03em; }
     .approach-captions p { margin-top: 10px; font-size: .95rem; grid-column: 2; }
-    html.approach-live .approach-captions li { position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; pointer-events: none; }
-    html.approach-live .approach-captions li[data-active] { opacity: 1; pointer-events: auto; }
+    /* Los cuadros inactivos salen del árbol de accesibilidad y del buscador (visibility), no solo de la vista. */
+    html.approach-live .approach-captions li { position: absolute; inset: 0 auto auto 0; width: 100%; visibility: hidden; pointer-events: none; }
+    html.approach-live .approach-captions li[data-active] { visibility: visible; pointer-events: auto; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .approach-card { margin: 0; position: relative; border: 1px solid var(--line); border-radius: 20px; padding: 18px 18px 14px; background: #0c0c14; min-height: 0; }
     .scene-ready .approach-card::after { content: ''; position: absolute; inset: -18px; z-index: -1; border-radius: 32px; background: var(--bg); filter: blur(20px); }
     .approach-meta, .approach-hint { display: flex; justify-content: space-between; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -132,7 +144,7 @@
     /* Sin movimiento o sin módulo: sin pin, figura en estado final y los seis cuadros como lista. */
     html.approach-static .approach-stage, html[data-motion="off"] .approach-stage { height: auto; }
     html.approach-static .approach-pin, html[data-motion="off"] .approach-pin { position: static; height: auto; display: block; }
-    html.approach-static .approach-captions li, html[data-motion="off"] .approach-captions li { position: static; opacity: 1; pointer-events: auto; }
+    html.approach-static .approach-captions li, html[data-motion="off"] .approach-captions li { position: static; visibility: visible; pointer-events: auto; }
     html.approach-static .approach-card { display: none; }
     html[data-motion="off"] .approach-card { margin-top: 36px; max-width: 760px; }
     html[data-motion="off"] .approach-figure { aspect-ratio: 1240 / 520; max-height: none; }
@@ -313,7 +325,8 @@
            avanza la animación. Sin movimiento o sin módulo, los seis cuadros son una lista. -->
       <div class="approach-stage" id="approach-stage">
         <div class="approach-pin">
-          <ol class="approach-captions" aria-live="polite">
+          <p class="visually-hidden" id="approach-status" aria-live="polite"></p>
+          <ol class="approach-captions">
             <li data-step="0"><span class="number">01</span><h3 data-i18n="stepOne">Campo operacional</h3><p data-i18n="stepOneBody">Todo empieza donde pasa el trabajo: personas, máquinas y una necesidad concreta que hoy se resuelve a mano.</p></li>
             <li data-step="1"><span class="number">02</span><h3 data-i18n="stepTwo">Entender</h3><p data-i18n="stepTwoBody">Preguntar, observar y levantar el proceso real. Una buena solución empieza por escuchar.</p></li>
             <li data-step="2"><span class="number">03</span><h3 data-i18n="stepThree">Diseñar</h3><p data-i18n="stepThreeBody">Datos, API y pantallas como partes de una misma experiencia. También cuando hay hardware de por medio.</p></li>
@@ -323,7 +336,7 @@
           </ol>
           <figure class="approach-card">
             <div class="approach-meta"><span data-i18n="approachFig">Fig 2</span><span class="approach-readout" data-readout>01 / 06</span></div>
-            <div class="approach-figure" aria-hidden="true"></div>
+            <div class="approach-figure"></div>
             <figcaption class="approach-hint" data-i18n="approachHint">Desplázate para avanzar</figcaption>
           </figure>
         </div>
@@ -393,7 +406,7 @@
         stepFour: 'Construir', stepFourBody: 'Código simple que aguanta producción, probado antes de salir del banco.',
         stepFive: 'Desplegar', stepFiveBody: 'Nube, dispositivos y la gente que lo va a usar. El producto llega a donde vive el trabajo.',
         stepSix: 'Operar y mejorar', stepSixBody: 'Medir, cuidar el rendimiento y volver al campo con lo aprendido. No termina en el último commit.',
-        approachFig: 'Fig 2', approachHint: 'Desplázate para avanzar',
+        approachFig: 'Fig 2', approachHint: 'Desplázate para avanzar', approachStatus: 'Paso {n} de 6: {title}',
         approachLabel: 'Línea de ensamble: de un campo operacional a software en uso, en seis estaciones.',
         stackTitle: 'Distintos lenguajes.\nUna misma intención.', stackBody: 'Elijo las herramientas por lo que resuelven, no por el ruido que hacen.',
         frontTitle: 'Interfaces que se sienten bien', frontBody: 'Frontend y móvil, con atención a la claridad, la consistencia y la experiencia de uso.',
@@ -434,7 +447,7 @@
         stepFour: 'Build', stepFourBody: 'Simple code that survives production, tested before it leaves the bench.',
         stepFive: 'Deploy', stepFiveBody: 'Cloud, devices and the people who will use it. The product reaches where the work lives.',
         stepSix: 'Run and improve', stepSixBody: 'Measure, keep it fast and bring what you learn back to the field. It does not end at the last commit.',
-        approachFig: 'Fig 2', approachHint: 'Scroll to advance',
+        approachFig: 'Fig 2', approachHint: 'Scroll to advance', approachStatus: 'Step {n} of 6: {title}',
         approachLabel: 'Assembly line: from an operational field to software in use, in six stations.',
         stackTitle: 'Different languages.\nThe same intention.', stackBody: 'I choose tools for what they solve, not for the noise they make.',
         frontTitle: 'Interfaces that feel right', frontBody: 'Frontend and mobile, with attention to clarity, consistency and the user experience.',
@@ -467,10 +480,20 @@
     const pin = stage.querySelector('.approach-pin');
     const captions = [...stage.querySelectorAll('.approach-captions li')];
     const readout = stage.querySelector('[data-readout]');
+    const status = document.getElementById('approach-status');
     const narrowQuery = matchMedia('(max-width: 767px)');
     function showStep(step) {
       captions.forEach((li, index) => { if (index === step) li.setAttribute('data-active', ''); else li.removeAttribute('data-active'); });
       readout.textContent = `0${step + 1} / 06`;
+      status.textContent = translations[lang].approachStatus.replace('{n}', step + 1).replace('{title}', captions[step].querySelector('h3').textContent);
+      if (!motionOff() && typeof Element.prototype.animate === 'function') {
+        const animation = captions[step].animate([
+          { opacity: 0, transform: 'translateY(12px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ], { duration: 420, easing: 'cubic-bezier(.23, 1, .32, 1)' });
+        animations.add(animation);
+        animation.onfinish = animation.oncancel = () => animations.delete(animation);
+      }
     }
     const storedLang = readStorage('lang');
     let lang = ['es', 'en'].includes(storedLang) ? storedLang : (navigator.language?.toLowerCase().startsWith('en') ? 'en' : 'es');
@@ -619,6 +642,9 @@
     canvas.addEventListener('identity-scene-error', () => { scene = null; root.classList.remove('scene-ready', 'scene-loading'); });
     canvas.addEventListener('webglcontextlost', () => root.classList.remove('scene-ready'));
     canvas.addEventListener('webglcontextrestored', () => { if (scene) root.classList.add('scene-ready'); });
+    // La figura se pide ya, en paralelo con la escena: no espera al CDN de Three.js.
+    const approachModule = import('./approach-figure.js');
+    approachModule.catch(() => {});
     try {
       const { mountIdentityScene } = await import('./scene.js');
       scene = await mountIdentityScene(canvas);
@@ -632,7 +658,7 @@
     }
     // La línea de ensamble: si el módulo falla, la sección queda como lista de seis pasos.
     try {
-      const { mountApproachFigure } = await import('./approach-figure.js');
+      const { mountApproachFigure } = await approachModule;
       figure = mountApproachFigure(stage.querySelector('.approach-figure'), { narrow: narrowQuery.matches });
       stage.querySelector('.approach-figure svg')?.setAttribute('aria-label', translations[lang].approachLabel);
       root.classList.add('approach-live');
