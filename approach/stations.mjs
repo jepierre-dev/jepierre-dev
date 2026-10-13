@@ -127,7 +127,7 @@ export function lens() {
 // Una mesa de dibujo con tres planos enrollados, una hoja abierta con cuadrícula,
 // una escuadra y una lámpara de brazo. Sobre la banda, un carrete desenrolla un plano.
 const S2 = STATION_X[2];
-export const SHEET = { cx: S2, z: BELT_TOP + 30 };
+export const SHEET = { cx: S2, z: BELT_TOP + 22 };
 function station2Back() {
   const out = [];
   const top = { x: S2 - 36, y: -104, w: 76, d: 48, r: 2 };
@@ -166,9 +166,9 @@ function station2Front() {
   out.push(S(k.slabOf(beam, 50, 3, P, 2, 0.3), { tone: "mid" }));
   out.push(D([at([S2, POST_Y, 53]), at([S2, 2, 53])], { size: 0.45 }));
   // Soporte y carrete colgando del brazo, sobre la banda.
-  out.push(S(k.slabOf({ x: S2 - 1.5, y: -3.5, w: 3, d: 3, r: 0.5 }, 45, 5, P, 2), { tone: "mid", crease: "none" }));
-  out.push(S(k.cylinder(S2, -2, 4, 41, 4, P, 24), { tone: "mid" }));
-  out.push(L(k.knurl(S2, -2, 4, 41, 45, 20, P), { tone: "lo" }));
+  out.push(S(k.slabOf({ x: S2 - 1.5, y: -3.5, w: 3, d: 3, r: 0.5 }, 37, 13, P, 2), { tone: "mid", crease: "none" }));
+  out.push(S(k.cylinder(S2, -2, 4, 33, 4, P, 24), { tone: "mid" }));
+  out.push(L(k.knurl(S2, -2, 4, 33, 37, 20, P), { tone: "lo" }));
   return out.join("");
 }
 // El plano que se desenrolla desde el carrete hacia la pieza (se reconstruye por frame).

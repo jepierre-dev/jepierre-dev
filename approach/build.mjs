@@ -44,7 +44,15 @@ const svg = G.svgBody([
 const kitSource = readFileSync(join(HERE, "kit", "iso-kit.mjs"), "utf8").replace(/^export /gm, "");
 const modelSource = readFileSync(join(HERE, "model.mjs"), "utf8").replace(/^export /gm, "");
 
+// La paleta del sitio sobre las variables del kit (solo tema oscuro).
 const CSS = `
+.approach-figure.iso{
+  --anatomy-paper:#0c0c14;--anatomy-face:#15151f;--anatomy-top:#181824;
+  --anatomy-shade-0:#0a0a11;--anatomy-shade-1:#0e0e16;--anatomy-shade-2:#12121b;--anatomy-shade-3:#161620;
+  --anatomy-lit-top:#2a2f2a;--anatomy-lit-shade:#1f241f;
+  --anatomy-hi:#d8d2c6;--anatomy-mid:#7a7784;--anatomy-lo:#4a4854;--anatomy-faint:#35333e;--anatomy-lit:#b6f09c;
+  --anatomy-halo:#000000;--anatomy-halo-opacity:.8;--anatomy-dot:#f3eadb;--anatomy-green:#b6f09c;
+}
 .approach-figure .iso-svg{display:block;width:100%;height:100%;overflow:visible}
 `;
 
@@ -60,13 +68,92 @@ const DIAL = ${JSON.stringify(ST.DIAL)};
 const sheetAt = ${ST.sheetAt.toString()};
 const needleAt = ${ST.needleAt.toString()};
 const meterAt = ${ST.meterAt.toString()};
-export function mountApproachFigure(host) {
-  if (!host) throw new TypeError("mountApproachFigure requires a host element.");
+const CSS = ${JSON.stringify(CSS)};
+const WINDOW = { wide: 0.82, narrow: 0.42 };
+
+// mountApproachFigure(host, { narrow }) → { update({ progress, paused }), setNarrow(bool), dispose() }
+// update fija un objetivo 0..6; un loop sigue el objetivo con follow exponencial y
+// se detiene al asentarse. paused salta al objetivo sin animar. El host recibe
+// data-step con el paso activo.
+export function mountApproachFigure(host, { narrow = false } = {}) {
+  if (!host || !host.ownerDocument) throw new TypeError("mountApproachFigure requires a host element.");
+  const doc = host.ownerDocument;
+  if (!doc.getElementById("approach-figure-css")) {
+    const style = doc.createElement("style");
+    style.id = "approach-figure-css";
+    style.textContent = ISO_CSS + CSS;
+    doc.head.append(style);
+  }
+  host.classList.add("iso");
   host.innerHTML = SVG;
   const svg = host.querySelector("svg");
+  const q = (sel) => svg.querySelector(sel);
+  const parts = {
+    piece: q('[data-part="piece"]'), forms: [...svg.querySelectorAll("[data-form]")],
+    lamp: q('[data-part="lamp"]'), lens: q('[data-part="lens"]'), sheet: q('[data-part="sheet"]'),
+    press: q('[data-part="press"]'), needle: q('[data-part="needle"]'), door: q('[data-part="door"]'),
+    led: q('[data-part="led"]'), meter: q('[data-part="meter"]'), runner: q('[data-part="runner"]'),
+  };
+  const screenXOf = (worldX) => iso([worldX, 0, BELT_TOP], P)[0];
+  let target = 0, shown = 0, paused = false, isNarrow = narrow;
+  let frame = 0, last = 0, visible = true, lastStep = -1, lastSheet = -1, lastBox = "";
+
+  function viewBoxFor(progress) {
+    const state = stateAt(progress);
+    const share = isNarrow ? WINDOW.narrow : WINDOW.wide;
+    const w = WIDTH * share, h = HEIGHT * (isNarrow ? 0.78 : 1);
+    const cx = Math.min(WIDTH - w / 2, Math.max(w / 2, screenXOf(state.viewX)));
+    return { cx, w, h };
+  }
+
+  function draw(progress) {
+    const s = stateAt(progress);
+    parts.piece.setAttribute("transform", translateAlong(P, [s.pieceX - STATIONS[0], 0, 0]));
+    parts.forms.forEach((g, f) => {
+      const o = f === s.form ? s.formBlend : f === s.form - 1 ? 1 - s.formBlend : 0;
+      g.setAttribute("opacity", o.toFixed(3));
+    });
+    const a = s.actions;
+    parts.lamp.setAttribute("opacity", (0.25 + 0.75 * a[0]).toFixed(3));
+    parts.lens.setAttribute("transform", translateAlong(P, [0, 0, -14 * a[1]]));
+    const sheetKey = Math.round(a[2] * 200);
+    if (sheetKey !== lastSheet) { parts.sheet.innerHTML = sheetAt(a[2]); lastSheet = sheetKey; }
+    parts.press.setAttribute("transform", translateAlong(P, [0, 0, -16 * a[3]]));
+    parts.needle.setAttribute("d", needleAt(a[3]));
+    parts.door.setAttribute("transform", translateAlong(P, [-30 * a[4], 0, 0]));
+    parts.led.setAttribute("opacity", a[4].toFixed(3));
+    parts.meter.setAttribute("d", meterAt(a[5]));
+    parts.runner.setAttribute("transform", translateAlong(P, [-(STATIONS[5] - STATIONS[0]) * s.returnT, 0, 0]));
+    if (s.step !== lastStep) { host.dataset.step = String(s.step); lastStep = s.step; }
+    const box = viewBoxFor(progress);
+    const value = (box.cx - box.w / 2).toFixed(1) + " " + ((HEIGHT - box.h) / 2).toFixed(1) + " " + box.w.toFixed(1) + " " + box.h.toFixed(1);
+    if (value !== lastBox) { svg.setAttribute("viewBox", value); lastBox = value; }
+  }
+
+  function tick(now) {
+    const dt = last ? Math.min((now - last) / 1000, 1 / 30) : 1 / 60;
+    last = now;
+    shown = paused ? target : shown + (target - shown) * (1 - Math.exp(-dt / 0.22));
+    if (Math.abs(target - shown) < 0.0005) shown = target;
+    draw(shown);
+    frame = visible && shown !== target ? requestAnimationFrame(tick) : 0;
+  }
+  const run = () => { if (!frame && visible) { last = 0; frame = requestAnimationFrame(tick); } };
+  const observer = typeof IntersectionObserver === "function"
+    ? new IntersectionObserver((entries) => { visible = entries[entries.length - 1].isIntersecting; if (visible) run(); }, { rootMargin: "120px 0px" })
+    : null;
+  observer?.observe(host);
+
+  draw(0);
   return {
-    update() {},
-    dispose() { host.innerHTML = ""; },
+    update({ progress, paused: nextPaused } = {}) {
+      if (typeof nextPaused === "boolean") paused = nextPaused;
+      if (Number.isFinite(progress)) target = Math.min(STEPS, Math.max(0, progress));
+      if (paused) { shown = target; draw(shown); if (frame) { cancelAnimationFrame(frame); frame = 0; } return; }
+      run();
+    },
+    setNarrow(value) { isNarrow = Boolean(value); lastBox = ""; draw(shown); },
+    dispose() { if (frame) cancelAnimationFrame(frame); observer?.disconnect(); host.innerHTML = ""; delete host.dataset.step; },
   };
 }
 `;

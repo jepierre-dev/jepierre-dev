@@ -1,0 +1,42 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+const ANAT = join(process.env.USERPROFILE || process.env.HOME, ".claude", "skills", "anatomy");
+function drive(actions) {
+  const file = join(mkdtempSync(join(tmpdir(), "approach-")), "actions.json");
+  writeFileSync(file, JSON.stringify(actions));
+  try {
+    return execFileSync(process.execPath, [join(ANAT, "scripts", "drive.mjs"), "approach/preview.html", "--actions", file], { encoding: "utf8" });
+  } catch (error) {
+    return `${error.stdout || ""}\n${error.stderr || ""}`;
+  }
+}
+
+test("update mueve la pieza, acciona mecanismos y expone data-step", () => {
+  const out = drive([
+    ["wait", 600],
+    ["eval", "window.__approach.update({ progress: 0, paused: true }); 'A:' + document.querySelector('[data-part=piece]').getAttribute('transform')"],
+    ["eval", "window.__approach.update({ progress: 3.9, paused: true }); 'B:' + document.querySelector('[data-part=piece]').getAttribute('transform')"],
+    ["eval", "'C:' + document.querySelector('.approach-figure').dataset.step"],
+    ["eval", "'D:' + (Number(document.querySelector('[data-form=\"3\"]').getAttribute('opacity')) > 0.8)"],
+    ["eval", "'E:' + document.querySelector('[data-part=press]').getAttribute('transform')"],
+    ["eval", "window.__approach.update({ progress: 6, paused: true }); 'F:' + document.querySelector('[data-part=runner]').getAttribute('transform')"],
+    ["eval", "window.__approach.setNarrow(true); window.__approach.update({ progress: 2, paused: true }); 'G:' + document.querySelector('svg').getAttribute('viewBox')"],
+  ]);
+  assert.match(out, /A:translate\(0 0\)/, `en p=0 la pieza está en reposo\n${out}`);
+  const moved = out.match(/B:translate\((-?[\d.]+) (-?[\d.]+)\)/);
+  assert.ok(moved && Number(moved[1]) > 100, `en p=3.9 la pieza se desplazó\n${out}`);
+  assert.match(out, /C:3\b/, "data-step=3 en p=3.9");
+  assert.match(out, /D:true/, "la forma 3 es visible al final del paso 3");
+  const press = out.match(/E:translate\((-?[\d.]+) (-?[\d.]+)\)/);
+  assert.ok(press && Number(press[2]) > 1, `la prensa bajó en p=3.9\n${out}`);
+  const runner = out.match(/F:translate\((-?[\d.]+) (-?[\d.]+)\)/);
+  assert.ok(runner && Number(runner[1]) < -100, `el punto volvió por el riel en p=6\n${out}`);
+  const box = out.match(/G:(-?[\d.]+) (-?[\d.]+) (-?[\d.]+) (-?[\d.]+)/);
+  assert.ok(box, `viewBox escrito\n${out}`);
+  assert.ok(Number(box[3]) < 1240 * 0.5, `viewBox estrecho en modo narrow: ${box[3]}`);
+});
